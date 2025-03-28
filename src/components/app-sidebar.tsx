@@ -25,8 +25,9 @@ import {
 import { NavMain } from "./nav-main";
 import { NavSecondary } from "./nav-secondary";
 import { NavUser } from "./nav-user";
+import Link from "next/link";
 
-const data = {
+export const navigationData = {
   user: {
     name: "shadcn",
     email: "m@example.com",
@@ -37,13 +38,18 @@ const data = {
       label: "Market Overview",
       items: [
         {
+          name: "Overview",
+          url: "/app",
+          icon: Globe,
+        },
+        {
           name: "Global Markets",
-          url: "#",
+          url: "/app/markets/global",
           icon: Globe,
         },
         {
           name: "Indian Markets",
-          url: "#",
+          url: "/app/markets/indian",
           icon: BarChart2,
         },
       ],
@@ -53,7 +59,7 @@ const data = {
       items: [
         {
           name: "Stock Scanner",
-          url: "#",
+          url: "/app/analysis/scanner",
           icon: LineChart,
         },
       ],
@@ -63,17 +69,17 @@ const data = {
       items: [
         {
           name: "Financial Reports",
-          url: "#",
+          url: "/app/fundamentals/reports",
           icon: FileText,
         },
         {
           name: "Balance Sheets",
-          url: "#",
+          url: "/app/fundamentals/balance",
           icon: DollarSign,
         },
         {
           name: "Profit and Loss",
-          url: "#",
+          url: "/app/fundamentals/profit-loss",
           icon: TrendingUp,
         },
       ],
@@ -82,42 +88,46 @@ const data = {
   navSecondary: [
     {
       title: "Support",
-      url: "#",
+      url: "/app/support",
       icon: LifeBuoy,
     },
     {
       title: "Feedback",
-      url: "#",
+      url: "/app/feedback",
       icon: Send,
     },
   ],
   projects: [
     {
       name: "Design Engineering",
-      url: "#",
+      url: "/app/projects/design",
       icon: Frame,
     },
     {
       name: "Sales & Marketing",
-      url: "#",
+      url: "/app/projects/sales",
       icon: PieChart,
     },
     {
       name: "Travel",
-      url: "#",
+      url: "/app/projects/travel",
       icon: Map,
     },
   ],
 };
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
+  pathname?: string;
+}
+
+export function AppSidebar({ pathname = "", ...props }: AppSidebarProps) {
   return (
     <Sidebar variant="inset" collapsible="icon" {...props}>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <a href="#">
+              <Link href="/app">
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
                   <Command className="size-4" />
                 </div>
@@ -125,18 +135,22 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <span className="truncate font-semibold">Stock analysis</span>
                   <span className="truncate text-xs">Platform</span>
                 </div>
-              </a>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
-        {/* <NavProjects projects={data.projects} /> */}
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
+        <NavMain items={navigationData.navMain} currentPath={pathname} />
+        {/* <NavProjects projects={navigationData.projects} /> */}
+        <NavSecondary
+          items={navigationData.navSecondary}
+          className="mt-auto"
+          currentPath={pathname}
+        />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser user={navigationData.user} />
       </SidebarFooter>
     </Sidebar>
   );

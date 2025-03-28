@@ -11,7 +11,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 
-// Define the correct type structure to match the data in app-sidebar.tsx
+
 interface NavItem {
   name: string;
   url: string;
@@ -23,11 +23,29 @@ interface NavSection {
   items: NavItem[];
 }
 
-export function NavMain({ items }: { items: NavSection[] }) {
+interface NavMainProps {
+  items: NavSection[];
+  currentPath?: string;
+  className?: string;
+}
+
+export function NavMain({ items, currentPath = "", className }: NavMainProps) {
   const { isMobile } = useSidebar();
 
+  const isActive = (url: string) => {
+    if (url === "/dashboard" && currentPath === "/dashboard") {
+      return true;
+    }
+
+    if (url !== "/dashboard" && currentPath.startsWith(url)) {
+      return true;
+    }
+
+    return false;
+  };
+
   return (
-    <div>
+    <div className={className}>
       {items.map((section, index) => (
         <SidebarGroup
           key={index}
@@ -37,7 +55,7 @@ export function NavMain({ items }: { items: NavSection[] }) {
           <SidebarMenu>
             {section.items.map(item => (
               <SidebarMenuItem key={item.name}>
-                <SidebarMenuButton asChild>
+                <SidebarMenuButton asChild isActive={isActive(item.url)}>
                   <Link href={item.url} className="flex items-center gap-2">
                     {item.icon && (
                       <div className="flex size-5 items-center justify-center">
