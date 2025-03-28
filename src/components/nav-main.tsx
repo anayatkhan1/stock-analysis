@@ -1,58 +1,57 @@
-"use client"
+"use client";
 
-import { IconCirclePlusFilled, IconMail, type Icon } from "@tabler/icons-react"
-
-import { Button } from "@/components/ui/button"
+import Link from "next/link";
+import { LucideIcon } from "lucide-react";
 import {
   SidebarGroup,
-  SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarMenu,
-  SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar"
+  SidebarMenuButton,
+  useSidebar,
+} from "@/components/ui/sidebar";
 
-export function NavMain({
-  items,
-}: {
-  items: {
-    title: string
-    url: string
-    icon?: Icon
-  }[]
-}) {
+// Define the correct type structure to match the data in app-sidebar.tsx
+interface NavItem {
+  name: string;
+  url: string;
+  icon?: LucideIcon;
+}
+
+interface NavSection {
+  label: string;
+  items: NavItem[];
+}
+
+export function NavMain({ items }: { items: NavSection[] }) {
+  const { isMobile } = useSidebar();
+
   return (
-    <SidebarGroup>
-      <SidebarGroupContent className="flex flex-col gap-2">
-        <SidebarMenu>
-          <SidebarMenuItem className="flex items-center gap-2">
-            <SidebarMenuButton
-              tooltip="Quick Create"
-              className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground min-w-8 duration-200 ease-linear"
-            >
-              <IconCirclePlusFilled />
-              <span>Quick Create</span>
-            </SidebarMenuButton>
-            <Button
-              size="icon"
-              className="size-8 group-data-[collapsible=icon]:opacity-0"
-              variant="outline"
-            >
-              <IconMail />
-              <span className="sr-only">Inbox</span>
-            </Button>
-          </SidebarMenuItem>
-        </SidebarMenu>
-        <SidebarMenu>
-          {items.map((item) => (
-            <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton tooltip={item.title}>
-                {item.icon && <item.icon />}
-                <span>{item.title}</span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
-        </SidebarMenu>
-      </SidebarGroupContent>
-    </SidebarGroup>
-  )
+    <div>
+      {items.map((section, index) => (
+        <SidebarGroup
+          key={index}
+          className="group-data-[collapsible=icon]:hidden"
+        >
+          <SidebarGroupLabel>{section.label}</SidebarGroupLabel>
+          <SidebarMenu>
+            {section.items.map(item => (
+              <SidebarMenuItem key={item.name}>
+                <SidebarMenuButton asChild>
+                  <Link href={item.url} className="flex items-center gap-2">
+                    {item.icon && (
+                      <div className="flex size-5 items-center justify-center">
+                        <item.icon className="size-4" />
+                      </div>
+                    )}
+                    <span>{item.name}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
+        </SidebarGroup>
+      ))}
+    </div>
+  );
 }
