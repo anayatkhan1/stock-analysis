@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import {
   IconArrowUpRight,
   IconChartBar,
@@ -13,19 +14,59 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { marketSummary, sectorPerformance } from "@/app/app/stock-data";
 import { Progress } from "@/components/ui/progress";
+import { MarketDataService, formatPercent } from "@/lib/data";
+import type { MarketSummary as MarketSummaryType, SectorPerformance } from "@/lib/data";
 
 export function MarketSummary() {
+  const [marketData, setMarketData] = React.useState<MarketSummaryType | null>(null);
+  const [sectorData, setSectorData] = React.useState<SectorPerformance[]>([]);
+  const [isLoading, setIsLoading] = React.useState(true);
+
+  // Fetch market summary and sector performance data
+  React.useEffect(() => {
+    async function fetchData() {
+      setIsLoading(true);
+      try {
+        const [marketSummary, sectorPerformance] = await Promise.all([
+          MarketDataService.getMarketSummary(),
+          MarketDataService.getSectorPerformance()
+        ]);
+
+        setMarketData(marketSummary);
+        setSectorData(sectorPerformance);
+      } catch (error) {
+        console.error("Failed to fetch market data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchData();
+  }, []);
+
+  if (isLoading || !marketData) {
+    return (
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <Card className="h-[400px] flex items-center justify-center">
+          <p>Loading market data...</p>
+        </Card>
+        <Card className="h-[400px] flex items-center justify-center">
+          <p>Loading sector data...</p>
+        </Card>
+      </div>
+    );
+  }
+
   // Calculate the percentage of advancers
   const totalStocks =
-    marketSummary.advancers + marketSummary.decliners + marketSummary.unchanged;
-  const advancersPercent = (marketSummary.advancers / totalStocks) * 100;
-  const declinersPercent = (marketSummary.decliners / totalStocks) * 100;
-  const unchangedPercent = (marketSummary.unchanged / totalStocks) * 100;
+    marketData.advancers + marketData.decliners + marketData.unchanged;
+  const advancersPercent = (marketData.advancers / totalStocks) * 100;
+  const declinersPercent = (marketData.decliners / totalStocks) * 100;
+  const unchangedPercent = (marketData.unchanged / totalStocks) * 100;
 
   // Sort sectors by performance
-  const sortedSectors = [...sectorPerformance].sort(
+  const sortedSectors = [...sectorData].sort(
     (a, b) => b.change - a.change,
   );
   const topSectors = sortedSectors.slice(0, 5);
@@ -52,7 +93,7 @@ export function MarketSummary() {
                   Advancers
                 </div>
                 <span>
-                  {marketSummary.advancers.toLocaleString()} (
+                  {marketData.advancers.toLocaleString()} (
                   {advancersPercent.toFixed(1)}%)
                 </span>
               </div>
@@ -70,7 +111,7 @@ export function MarketSummary() {
                   Decliners
                 </div>
                 <span>
-                  {marketSummary.decliners.toLocaleString()} (
+                  {marketData.decliners.toLocaleString()} (
                   {declinersPercent.toFixed(1)}%)
                 </span>
               </div>
@@ -87,7 +128,7 @@ export function MarketSummary() {
                   Unchanged
                 </div>
                 <span>
-                  {marketSummary.unchanged.toLocaleString()} (
+                  {marketData.unchanged.toLocaleString()} (
                   {unchangedPercent.toFixed(1)}%)
                 </span>
               </div>
@@ -102,22 +143,22 @@ export function MarketSummary() {
               <div className="flex items-center justify-between border-t pt-2">
                 <span className="text-muted-foreground">Total Volume</span>
                 <span className="font-medium">
-                  {marketSummary.totalVolume.toFixed(1)}B shares
+                  {marketData.totalVolume.toFixed(1)}B shares
                 </span>
               </div>
               <div className="flex items-center justify-between border-t pt-2">
                 <span className="text-muted-foreground">Market Trend</span>
                 <span
                   className={`font-medium ${
-                    marketSummary.marketTrend === "bullish"
+                    marketData.marketTrend === "bullish"
                       ? "text-green-500"
-                      : marketSummary.marketTrend === "bearish"
+                      : marketData.marketTrend === "bearish"
                       ? "text-red-500"
                       : "text-yellow-500"
                   }`}
                 >
-                  {marketSummary.marketTrend.charAt(0).toUpperCase() +
-                    marketSummary.marketTrend.slice(1)}
+                  {marketData.marketTrend.charAt(0).toUpperCase() +
+                    marketData.marketTrend.slice(1)}
                 </span>
               </div>
             </div>
@@ -151,8 +192,7 @@ export function MarketSummary() {
                         sector.change > 0 ? "text-green-500" : "text-red-500"
                       }
                     >
-                      {sector.change > 0 ? "+" : ""}
-                      {sector.change.toFixed(2)}%
+                      {formatPercent(sector.change)}
                     </span>
                   </div>
                 ))}
@@ -173,8 +213,7 @@ export function MarketSummary() {
                         sector.change > 0 ? "text-green-500" : "text-red-500"
                       }
                     >
-                      {sector.change > 0 ? "+" : ""}
-                      {sector.change.toFixed(2)}%
+                      {formatPercent(sector.change)}
                     </span>
                   </div>
                 ))}

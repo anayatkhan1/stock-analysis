@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { IconTrendingDown, IconTrendingUp } from "@tabler/icons-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -11,22 +12,33 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { marketIndices } from "@/app/app/stock-data";
+import { MarketDataService, formatNumber, formatPercent } from "@/lib/data";
+import type { MarketIndex } from "@/lib/data";
 
 interface SectionCardsProps {
   onSelectIndex?: (indexName: string) => void;
 }
 
 export function SectionCards({ onSelectIndex }: SectionCardsProps) {
+  const [indices, setIndices] = React.useState<MarketIndex[]>([]);
+  const [isLoading, setIsLoading] = React.useState(true);
 
-  const formatNumber = (num: number): string => {
-    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  };
+  // Fetch market indices data
+  React.useEffect(() => {
+    async function fetchData() {
+      setIsLoading(true);
+      try {
+        const marketIndices = await MarketDataService.getMarketIndices();
+        setIndices(marketIndices);
+      } catch (error) {
+        console.error("Failed to fetch market indices:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
 
-
-  const formatPercent = (percent: number): string => {
-    return (percent > 0 ? "+" : "") + percent.toFixed(2) + "%";
-  };
+    fetchData();
+  }, []);
 
   const handleCardClick = (indexName: string) => {
     if (onSelectIndex) {
@@ -34,9 +46,21 @@ export function SectionCards({ onSelectIndex }: SectionCardsProps) {
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="grid @5xl/main:grid-cols-4 @xl/main:grid-cols-2 grid-cols-1 gap-4 px-4 lg:px-6">
+        {[1, 2, 3, 4].map(i => (
+          <Card key={i} className="h-[180px] flex items-center justify-center">
+            <p>Loading market data...</p>
+          </Card>
+        ))}
+      </div>
+    );
+  }
+
   return (
     <div className="grid @5xl/main:grid-cols-4 @xl/main:grid-cols-2 grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card *:data-[slot=card]:shadow-xs lg:px-6 dark:*:data-[slot=card]:bg-card">
-      {marketIndices.map(index => (
+      {indices.map(index => (
         <Card
           key={index.name}
           className="@container/card cursor-pointer transition-all hover:shadow-md"

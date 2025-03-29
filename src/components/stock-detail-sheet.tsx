@@ -9,7 +9,6 @@ import {
 } from "@tabler/icons-react";
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
-import { StockData, generateHistoricalData } from "@/app/app/stock-data";
 import {
   Sheet,
   SheetContent,
@@ -26,22 +25,13 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { ChartDataItem, MarketDataService, StockData, formatMarketCap, formatNumber, formatPercent } from "@/lib/data";
 
 interface StockDetailSheetProps {
   stock: StockData;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
-
-
-const generateStockHistoricalData = (stock: StockData) => {
-
-  const baseValue = stock.price;
-
-  const volatility = Math.max(5, 20 - stock.marketCap / 1000);
-
-  return generateHistoricalData(baseValue, volatility);
-};
 
 const chartConfig = {
   price: {
@@ -60,74 +50,45 @@ export function StockDetailSheet({
   onOpenChange,
 }: StockDetailSheetProps) {
   const [timeRange, setTimeRange] = React.useState("30d");
-  const [stockData, setStockData] = React.useState<any[]>([]);
-
-
-  const formatNumber = (num: number): string => {
-    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  };
-
-
-  const formatMarketCap = (marketCap: number): string => {
-    if (marketCap >= 1000) {
-      return `$${(marketCap / 1000).toFixed(2)}T`;
-    }
-    return `$${marketCap.toFixed(2)}B`;
-  };
-
-
-  const formatPercent = (percent: number): string => {
-    return (percent > 0 ? "+" : "") + percent.toFixed(2) + "%";
-  };
+  const [stockData, setStockData] = React.useState<ChartDataItem[]>([]);
+  const [filteredData, setFilteredData] = React.useState<ChartDataItem[]>([]);
+  const [isLoading, setIsLoading] = React.useState(true);
 
   const isPositive = stock.changePercent > 0;
 
-
+  // Fetch historical data for the stock
   React.useEffect(() => {
-    if (stock) {
-      const historicalData = generateStockHistoricalData(stock);
-      const formattedData = historicalData.map(item => ({
-        date: item.date,
-        price: item.close,
-        volume: item.volume * (stock.volume / 10),
-      }));
-      setStockData(formattedData);
+    async function fetchData() {
+      if (!stock) return;
+
+      setIsLoading(true);
+      try {
+        const historicalData = await MarketDataService.getStockHistoricalData(stock);
+        const formattedData = MarketDataService.formatChartData(historicalData).map(item => ({
+          ...item,
+          volume: item.volume * (stock.volume / 10), // Scale volume based on stock's volume
+        }));
+        setStockData(formattedData);
+      } catch (error) {
+        console.error("Failed to fetch stock historical data:", error);
+      } finally {
+        setIsLoading(false);
+      }
     }
+
+    fetchData();
   }, [stock]);
 
-
-  const filteredData = React.useMemo(() => {
-    return stockData.filter(item => {
-      const date = new Date(item.date);
-      const referenceDate = new Date();
-      let daysToSubtract = 90;
-      if (timeRange === "30d") {
-        daysToSubtract = 30;
-      } else if (timeRange === "7d") {
-        daysToSubtract = 7;
-      }
-      const startDate = new Date(referenceDate);
-      startDate.setDate(startDate.getDate() - daysToSubtract);
-      return date >= startDate;
-    });
+  // Filter data by time range
+  React.useEffect(() => {
+    const filtered = MarketDataService.filterDataByTimeRange(
+      stockData,
+      timeRange as '7d' | '30d' | '90d'
+    );
+    setFilteredData(filtered);
   }, [timeRange, stockData]);
 
-
-  const calculateChange = (data: typeof filteredData) => {
-    if (data.length < 2) return { value: 0, percent: 0 };
-
-    const firstPrice = data[0].price;
-    const lastPrice = data[data.length - 1].price;
-    const change = lastPrice - firstPrice;
-    const percentChange = (change / firstPrice) * 100;
-
-    return {
-      value: change.toFixed(2),
-      percent: percentChange.toFixed(2),
-    };
-  };
-
-  const chartChange = calculateChange(filteredData);
+  const chartChange = MarketDataService.calculateChange(filteredData);
   const chartIsPositive = parseFloat(chartChange.percent as string) >= 0;
 
   return (
@@ -259,94 +220,100 @@ export function StockDetailSheet({
             </div>
 
             <div className="h-[300px] w-full">
-              <ChartContainer
-                config={chartConfig}
-                className="aspect-auto h-full w-full"
-              >
-                <AreaChart data={filteredData}>
-                  <defs>
-                    <linearGradient
-                      id="fillStockPrice"
-                      x1="0"
-                      y1="0"
-                      x2="0"
-                      y2="1"
-                    >
-                      <stop
-                        offset="5%"
-                        stopColor={
-                          chartIsPositive
-                            ? "rgba(34, 197, 94, 0.8)"
-                            : "rgba(239, 68, 68, 0.8)"
-                        }
-                        stopOpacity={0.8}
-                      />
-                      <stop
-                        offset="95%"
-                        stopColor={
-                          chartIsPositive
-                            ? "rgba(34, 197, 94, 0.1)"
-                            : "rgba(239, 68, 68, 0.1)"
-                        }
-                        stopOpacity={0.1}
-                      />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid vertical={false} strokeDasharray="3 3" />
-                  <XAxis
-                    dataKey="date"
-                    tickLine={false}
-                    axisLine={false}
-                    tickMargin={8}
-                    minTickGap={32}
-                    tickFormatter={value => {
-                      const date = new Date(value);
-                      return date.toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                      });
-                    }}
-                  />
-                  <YAxis
-                    domain={["auto", "auto"]}
-                    tickFormatter={value => value.toLocaleString()}
-                    tickLine={false}
-                    axisLine={false}
-                    tickMargin={8}
-                  />
-                  <ChartTooltip
-                    cursor={false}
-                    content={
-                      <ChartTooltipContent
-                        labelFormatter={value => {
-                          return new Date(value).toLocaleDateString("en-US", {
-                            weekday: "short",
-                            month: "short",
-                            day: "numeric",
-                          });
-                        }}
-                        indicator="dot"
-                        formatter={(value: any) => {
-                          return typeof value === "number"
-                            ? value.toLocaleString()
-                            : value;
-                        }}
-                      />
-                    }
-                  />
-                  <Area
-                    dataKey="price"
-                    type="monotone"
-                    fill="url(#fillStockPrice)"
-                    stroke={
-                      chartIsPositive
-                        ? "rgba(34, 197, 94, 1)"
-                        : "rgba(239, 68, 68, 1)"
-                    }
-                    strokeWidth={2}
-                  />
-                </AreaChart>
-              </ChartContainer>
+              {isLoading ? (
+                <div className="flex items-center justify-center h-full">
+                  <p>Loading chart data...</p>
+                </div>
+              ) : (
+                <ChartContainer
+                  config={chartConfig}
+                  className="aspect-auto h-full w-full"
+                >
+                  <AreaChart data={filteredData}>
+                    <defs>
+                      <linearGradient
+                        id="fillStockPrice"
+                        x1="0"
+                        y1="0"
+                        x2="0"
+                        y2="1"
+                      >
+                        <stop
+                          offset="5%"
+                          stopColor={
+                            chartIsPositive
+                              ? "rgba(34, 197, 94, 0.8)"
+                              : "rgba(239, 68, 68, 0.8)"
+                          }
+                          stopOpacity={0.8}
+                        />
+                        <stop
+                          offset="95%"
+                          stopColor={
+                            chartIsPositive
+                              ? "rgba(34, 197, 94, 0.1)"
+                              : "rgba(239, 68, 68, 0.1)"
+                          }
+                          stopOpacity={0.1}
+                        />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid vertical={false} strokeDasharray="3 3" />
+                    <XAxis
+                      dataKey="date"
+                      tickLine={false}
+                      axisLine={false}
+                      tickMargin={8}
+                      minTickGap={32}
+                      tickFormatter={value => {
+                        const date = new Date(value);
+                        return date.toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                        });
+                      }}
+                    />
+                    <YAxis
+                      domain={["auto", "auto"]}
+                      tickFormatter={value => value.toLocaleString()}
+                      tickLine={false}
+                      axisLine={false}
+                      tickMargin={8}
+                    />
+                    <ChartTooltip
+                      cursor={false}
+                      content={
+                        <ChartTooltipContent
+                          labelFormatter={value => {
+                            return new Date(value).toLocaleDateString("en-US", {
+                              weekday: "short",
+                              month: "short",
+                              day: "numeric",
+                            });
+                          }}
+                          indicator="dot"
+                          formatter={(value: any) => {
+                            return typeof value === "number"
+                              ? value.toLocaleString()
+                              : value;
+                          }}
+                        />
+                      }
+                    />
+                    <Area
+                      dataKey="price"
+                      type="monotone"
+                      fill="url(#fillStockPrice)"
+                      stroke={
+                        chartIsPositive
+                          ? "rgba(34, 197, 94, 1)"
+                          : "rgba(239, 68, 68, 1)"
+                      }
+                      strokeWidth={2}
+                    />
+                  </AreaChart>
+                </ChartContainer>
+              )}
             </div>
           </TabsContent>
         </Tabs>

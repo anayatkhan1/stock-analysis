@@ -44,10 +44,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { StockData, topStocks } from "@/app/app/stock-data";
 import { StockDetailSheet } from "@/components/stock-detail-sheet";
+import { MarketDataService, formatMarketCap, formatNumber, formatPercent } from "@/lib/data";
+import type { StockData } from "@/lib/data";
 
 export function StockTable() {
+  const [stocks, setStocks] = React.useState<StockData[]>([]);
+  const [isLoading, setIsLoading] = React.useState(true);
   const [sorting, setSorting] = React.useState<SortingState>([
     { id: "marketCap", desc: true },
   ]);
@@ -63,21 +66,22 @@ export function StockTable() {
   const [selectedStock, setSelectedStock] = React.useState<StockData | null>(null);
   const [sheetOpen, setSheetOpen] = React.useState(false);
 
-
-  const formatNumber = (num: number): string => {
-    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  };
-
-  const formatMarketCap = (marketCap: number): string => {
-    if (marketCap >= 1000) {
-      return `$${(marketCap / 1000).toFixed(2)}T`;
+  // Fetch top stocks data
+  React.useEffect(() => {
+    async function fetchData() {
+      setIsLoading(true);
+      try {
+        const topStocks = await MarketDataService.getTopStocks();
+        setStocks(topStocks);
+      } catch (error) {
+        console.error("Failed to fetch top stocks:", error);
+      } finally {
+        setIsLoading(false);
+      }
     }
-    return `$${marketCap.toFixed(2)}B`;
-  };
 
-  const formatPercent = (percent: number): string => {
-    return (percent > 0 ? "+" : "") + percent.toFixed(2) + "%";
-  };
+    fetchData();
+  }, []);
 
 
   const handleStockClick = (stock: StockData) => {
@@ -170,7 +174,7 @@ export function StockTable() {
   ];
 
   const table = useReactTable({
-    data: topStocks,
+    data: stocks,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -204,6 +208,22 @@ export function StockTable() {
     setSearchQuery(e.target.value);
     table.setGlobalFilter(e.target.value);
   };
+
+  if (isLoading) {
+    return (
+      <Card className="data-[slot=card]:bg-gradient-to-t data-[slot=card]:from-primary/5 data-[slot=card]:to-card data-[slot=card]:shadow-xs dark:data-[slot=card]:bg-card">
+        <CardHeader>
+          <CardTitle>Top Stocks</CardTitle>
+          <CardDescription>
+            Market leaders by market capitalization
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="h-[500px] flex items-center justify-center">
+          <p>Loading stock data...</p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <>
@@ -309,7 +329,7 @@ export function StockTable() {
           </div>
           <div className="flex items-center justify-end space-x-2 py-4">
             <div className="flex-1 text-muted-foreground text-sm">
-              Showing {table.getRowModel().rows.length} of {topStocks.length}{" "}
+              Showing {table.getRowModel().rows.length} of {stocks.length}{" "}
               stocks
             </div>
             <div className="space-x-2">
