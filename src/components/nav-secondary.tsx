@@ -1,7 +1,8 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { type Icon } from "@tabler/icons-react"
+import * as React from "react";
+import { type LucideIcon } from "lucide-react";
+import Link from "next/link";
 
 import {
   SidebarGroup,
@@ -9,34 +10,47 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
+
+interface NavSecondaryProps
+  extends React.ComponentPropsWithoutRef<typeof SidebarGroup> {
+  items: {
+    title: string;
+    url: string;
+    icon: LucideIcon;
+  }[];
+  currentPath?: string;
+}
 
 export function NavSecondary({
   items,
+  currentPath = "",
   ...props
-}: {
-  items: {
-    title: string
-    url: string
-    icon: Icon
-  }[]
-} & React.ComponentPropsWithoutRef<typeof SidebarGroup>) {
+}: NavSecondaryProps) {
+  const isActive = (url: string) => {
+    return currentPath === url || currentPath.startsWith(url);
+  };
+
   return (
     <SidebarGroup {...props}>
       <SidebarGroupContent>
         <SidebarMenu>
-          {items.map((item) => (
+          {items.map(item => (
             <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton asChild>
-                <a href={item.url}>
+              <SidebarMenuButton
+                asChild
+                size="sm"
+                isActive={isActive(item.url)}
+              >
+                <Link href={item.url}>
                   <item.icon />
                   <span>{item.title}</span>
-                </a>
+                </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
           ))}
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>
-  )
+  );
 }

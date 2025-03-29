@@ -1,4 +1,5 @@
 import { ThemeProvider } from "@/components/theme-provider";
+import { SharedLayout } from "@/components/shared-layout";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -31,11 +32,14 @@ export default function RootLayout({
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"
-          enableSystem={false}
-          forcedTheme="dark"
+          enableSystem
           disableTransitionOnChange
         >
-          <main>{children}</main>
+          <SharedLayout>
+            <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+              {children}
+            </div>
+          </SharedLayout>
         </ThemeProvider>
       </body>
     </html>
