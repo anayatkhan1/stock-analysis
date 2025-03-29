@@ -5,6 +5,7 @@ import {
 	SectorPerformance,
 	StockData,
 	StockHistoricalData,
+	TechnicalIndicator,
 } from "./types";
 import {
 	generateHistoricalData,
@@ -15,6 +16,7 @@ import {
 	mockSectorPerformance,
 	mockIndianSectorPerformance,
 	mockTopStocks,
+	mockTechnicalIndicators,
 } from "./mock-data";
 
 /**
@@ -163,5 +165,14 @@ export class MarketDataService {
 			value: change.toFixed(2),
 			percent: percentChange.toFixed(2),
 		};
+	}
+
+	/**
+	 * Get technical indicators
+	 */
+	static async getTechnicalIndicators(): Promise<TechnicalIndicator[]> {
+		// In the future, replace with API call
+		// return fetch('/api/technical-indicators').then(res => res.json());
+		return Promise.resolve(mockTechnicalIndicators);
 	}
 }

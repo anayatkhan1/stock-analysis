@@ -64,7 +64,7 @@ export const navigationData = {
       items: [
         {
           name: "Stock Scanner",
-          url: "/app/analysis/scanner",
+          url: "/app/stock-scanner",
           icon: LineChart,
         },
       ],

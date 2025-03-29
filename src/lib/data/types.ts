@@ -46,3 +46,10 @@ export interface ChartDataItem {
   price: number;
   volume: number;
 }
+
+export interface TechnicalIndicator {
+  id: string;
+  name: string;
+  description: string;
+  type: 'momentum' | 'trend' | 'volatility' | 'volume';
+}

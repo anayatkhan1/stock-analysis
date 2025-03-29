@@ -4,6 +4,7 @@ import {
 	SectorPerformance,
 	StockData,
 	StockHistoricalData,
+	TechnicalIndicator,
 } from "./types";
 
 // Generate historical data for market indices
@@ -82,7 +83,7 @@ export const mockMarketIndices: MarketIndex[] = [
 export const mockIndianMarketIndices: MarketIndex[] = [
 	{
 		name: "NIFTY 50",
-		value: 22456.80,
+		value: 22456.8,
 		change: 167.45,
 		changePercent: 0.75,
 	},
@@ -100,8 +101,8 @@ export const mockIndianMarketIndices: MarketIndex[] = [
 	},
 	{
 		name: "NIFTY IT",
-		value: 36789.20,
-		change: 528.30,
+		value: 36789.2,
+		change: 528.3,
 		changePercent: 1.45,
 	},
 ];
@@ -122,7 +123,7 @@ export const mockIndexHistoricalData = {
 	"Russell 2000": generateHistoricalData(2100, 25),
 	// Indian market indices
 	"NIFTY 50": generateHistoricalData(22000, 150),
-	"SENSEX": generateHistoricalData(73000, 400),
+	SENSEX: generateHistoricalData(73000, 400),
 	"BANK NIFTY": generateHistoricalData(48000, 200),
 	"NIFTY IT": generateHistoricalData(36500, 180),
 };
@@ -278,4 +279,71 @@ export const mockIndianSectorPerformance: SectorPerformance[] = [
 	{ sector: "Oil & Gas", change: -0.56 },
 	{ sector: "Power", change: 0.31 },
 	{ sector: "Media", change: -0.18 },
+];
+
+// Technical indicators
+export const mockTechnicalIndicators: TechnicalIndicator[] = [
+	{
+		id: "rsi",
+		name: "Relative Strength Index (RSI)",
+		description:
+			"Measures the speed and change of price movements on a scale of 0-100. Values above 70 indicate overbought conditions, while values below 30 indicate oversold conditions.",
+		type: "momentum",
+	},
+	{
+		id: "macd",
+		name: "Moving Average Convergence Divergence (MACD)",
+		description:
+			"Shows the relationship between two moving averages of a security's price. The MACD is calculated by subtracting the 26-period EMA from the 12-period EMA.",
+		type: "momentum",
+	},
+	{
+		id: "stoch",
+		name: "Stochastic Oscillator",
+		description:
+			"Compares a security's closing price to its price range over a specific period. It generates overbought and oversold signals.",
+		type: "momentum",
+	},
+	{
+		id: "sma",
+		name: "Simple Moving Average (SMA)",
+		description:
+			"Calculates the average price over a specific period. It helps identify the direction of the trend and potential support/resistance levels.",
+		type: "trend",
+	},
+	{
+		id: "ema",
+		name: "Exponential Moving Average (EMA)",
+		description:
+			"Similar to SMA but gives more weight to recent prices. It responds more quickly to price changes than the SMA.",
+		type: "trend",
+	},
+	{
+		id: "bb",
+		name: "Bollinger Bands",
+		description:
+			"Consists of a middle band (SMA) with upper and lower bands that are standard deviations away from the middle band. They help identify volatility and potential reversal points.",
+		type: "volatility",
+	},
+	{
+		id: "atr",
+		name: "Average True Range (ATR)",
+		description:
+			"Measures market volatility by calculating the average range between high and low prices over a specific period.",
+		type: "volatility",
+	},
+	{
+		id: "obv",
+		name: "On-Balance Volume (OBV)",
+		description:
+			"Relates volume to price change. It adds volume on up days and subtracts volume on down days to identify buying and selling pressure.",
+		type: "volume",
+	},
+	{
+		id: "vwap",
+		name: "Volume-Weighted Average Price (VWAP)",
+		description:
+			"Calculates the average price weighted by volume. It helps identify the true average price and liquidity levels.",
+		type: "volume",
+	},
 ];
