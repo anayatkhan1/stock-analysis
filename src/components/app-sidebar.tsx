@@ -35,21 +35,26 @@ export const navigationData = {
   },
   navMain: [
     {
-      label: "Market Overview",
+      label: "",
       items: [
         {
           name: "Overview",
           url: "/app",
           icon: Globe,
         },
+      ],
+    },
+    {
+      label: "Markets",
+      items: [
         {
           name: "Global Markets",
-          url: "/app/markets/global",
+          url: "/app/global",
           icon: Globe,
         },
         {
           name: "Indian Markets",
-          url: "/app/markets/indian",
+          url: "/app/indian",
           icon: BarChart2,
         },
       ],

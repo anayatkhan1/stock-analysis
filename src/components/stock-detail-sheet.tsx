@@ -49,7 +49,7 @@ export function StockDetailSheet({
   open,
   onOpenChange,
 }: StockDetailSheetProps) {
-  const [timeRange, setTimeRange] = React.useState("30d");
+  const [timeRange, setTimeRange] = React.useState("3m");
   const [stockData, setStockData] = React.useState<ChartDataItem[]>([]);
   const [filteredData, setFilteredData] = React.useState<ChartDataItem[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
@@ -83,7 +83,7 @@ export function StockDetailSheet({
   React.useEffect(() => {
     const filtered = MarketDataService.filterDataByTimeRange(
       stockData,
-      timeRange as '7d' | '30d' | '90d'
+      timeRange as '1m' | '3m' | '6m' | '1y' | '5y'
     );
     setFilteredData(filtered);
   }, [timeRange, stockData]);
@@ -207,14 +207,20 @@ export function StockDetailSheet({
                 variant="outline"
                 className="flex"
               >
-                <ToggleGroupItem value="90d" className="h-8 px-2.5">
-                  3M
-                </ToggleGroupItem>
-                <ToggleGroupItem value="30d" className="h-8 px-2.5">
+                <ToggleGroupItem value="1m" className="h-8 px-2.5">
                   1M
                 </ToggleGroupItem>
-                <ToggleGroupItem value="7d" className="h-8 px-2.5">
-                  1W
+                <ToggleGroupItem value="3m" className="h-8 px-2.5">
+                  3M
+                </ToggleGroupItem>
+                <ToggleGroupItem value="6m" className="h-8 px-2.5">
+                  6M
+                </ToggleGroupItem>
+                <ToggleGroupItem value="1y" className="h-8 px-2.5">
+                  1Y
+                </ToggleGroupItem>
+                <ToggleGroupItem value="5y" className="h-8 px-2.5">
+                  5Y
                 </ToggleGroupItem>
               </ToggleGroup>
             </div>

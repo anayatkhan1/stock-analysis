@@ -14,7 +14,6 @@ export function SharedLayout({ children }: SharedLayoutProps) {
 
 
   const isAppPath = pathname.startsWith("/app");
-  const isRootPath = pathname === "/";
 
 
   if (!isAppPath) {

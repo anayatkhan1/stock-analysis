@@ -97,20 +97,24 @@ export class MarketDataService {
    * Filter historical data by time range
    */
   static filterDataByTimeRange(
-    data: ChartDataItem[], 
-    timeRange: '7d' | '30d' | '90d'
+    data: ChartDataItem[],
+    timeRange: '1m' | '3m' | '6m' | '1y' | '5y'
   ): ChartDataItem[] {
     return data.filter(item => {
       const date = new Date(item.date);
       const referenceDate = new Date();
-      let daysToSubtract = 90;
-      
-      if (timeRange === "30d") {
-        daysToSubtract = 30;
-      } else if (timeRange === "7d") {
-        daysToSubtract = 7;
+      let daysToSubtract = 30; // Default 1 month
+
+      if (timeRange === "3m") {
+        daysToSubtract = 90;
+      } else if (timeRange === "6m") {
+        daysToSubtract = 180;
+      } else if (timeRange === "1y") {
+        daysToSubtract = 365;
+      } else if (timeRange === "5y") {
+        daysToSubtract = 365 * 5;
       }
-      
+
       const startDate = new Date(referenceDate);
       startDate.setDate(startDate.getDate() - daysToSubtract);
       return date >= startDate;

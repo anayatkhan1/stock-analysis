@@ -33,11 +33,14 @@ export function NavMain({ items, currentPath = "", className }: NavMainProps) {
   const { isMobile } = useSidebar();
 
   const isActive = (url: string) => {
-    if (url === "/dashboard" && currentPath === "/dashboard") {
+    // Exact match for the overview page
+    if (url === "/app" && currentPath === "/app") {
       return true;
     }
 
-    if (url !== "/dashboard" && currentPath.startsWith(url)) {
+    // For other pages, check if the current path matches exactly or is a subpath
+    if (url !== "/app" && (currentPath === url ||
+        (currentPath.startsWith(url) && currentPath.charAt(url.length) === '/'))) {
       return true;
     }
 

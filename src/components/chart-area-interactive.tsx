@@ -48,7 +48,7 @@ export function ChartAreaInteractive({
   selectedIndex,
 }: ChartAreaInteractiveProps) {
   const isMobile = useIsMobile();
-  const [timeRange, setTimeRange] = React.useState("30d");
+  const [timeRange, setTimeRange] = React.useState("3m");
   const [indexName, setIndexName] = React.useState(selectedIndex || "S&P 500");
   const [chartData, setChartData] = React.useState<ChartDataItem[]>([]);
   const [filteredData, setFilteredData] = React.useState<ChartDataItem[]>([]);
@@ -76,7 +76,7 @@ export function ChartAreaInteractive({
   React.useEffect(() => {
     const filtered = MarketDataService.filterDataByTimeRange(
       chartData,
-      timeRange as '7d' | '30d' | '90d'
+      timeRange as '1m' | '3m' | '6m' | '1y' | '5y'
     );
     setFilteredData(filtered);
   }, [timeRange, chartData]);
@@ -84,7 +84,7 @@ export function ChartAreaInteractive({
   // Set mobile-friendly time range
   React.useEffect(() => {
     if (isMobile) {
-      setTimeRange("7d");
+      setTimeRange("1m");
     }
   }, [isMobile]);
 
@@ -114,15 +114,27 @@ export function ChartAreaInteractive({
         </div>
         <CardDescription>
           <span className="@[540px]/card:block hidden">
-            {timeRange === "90d"
+            {timeRange === "5y"
+              ? "5 year"
+              : timeRange === "1y"
+              ? "1 year"
+              : timeRange === "6m"
+              ? "6 month"
+              : timeRange === "3m"
               ? "3 month"
-              : timeRange === "30d"
-              ? "1 month"
-              : "1 week"}{" "}
+              : "1 month"}{" "}
             price movement
           </span>
           <span className="@[540px]/card:hidden">
-            {timeRange === "90d" ? "3M" : timeRange === "30d" ? "1M" : "1W"}{" "}
+            {timeRange === "5y"
+              ? "5Y"
+              : timeRange === "1y"
+              ? "1Y"
+              : timeRange === "6m"
+              ? "6M"
+              : timeRange === "3m"
+              ? "3M"
+              : "1M"}{" "}
             movement
           </span>
         </CardDescription>
@@ -134,14 +146,20 @@ export function ChartAreaInteractive({
             variant="outline"
             className="@[767px]/card:flex hidden"
           >
-            <ToggleGroupItem value="90d" className="h-8 px-2.5">
-              3 Months
+            <ToggleGroupItem value="1m" className="h-8 px-2.5">
+              1M
             </ToggleGroupItem>
-            <ToggleGroupItem value="30d" className="h-8 px-2.5">
-              1 Month
+            <ToggleGroupItem value="3m" className="h-8 px-2.5">
+              3M
             </ToggleGroupItem>
-            <ToggleGroupItem value="7d" className="h-8 px-2.5">
-              1 Week
+            <ToggleGroupItem value="6m" className="h-8 px-2.5">
+              6M
+            </ToggleGroupItem>
+            <ToggleGroupItem value="1y" className="h-8 px-2.5">
+              1Y
+            </ToggleGroupItem>
+            <ToggleGroupItem value="5y" className="h-8 px-2.5">
+              5Y
             </ToggleGroupItem>
           </ToggleGroup>
           <Select value={timeRange} onValueChange={setTimeRange}>
@@ -152,14 +170,20 @@ export function ChartAreaInteractive({
               <SelectValue placeholder="3 Months" />
             </SelectTrigger>
             <SelectContent className="rounded-xl">
-              <SelectItem value="90d" className="rounded-lg">
-                3 Months
-              </SelectItem>
-              <SelectItem value="30d" className="rounded-lg">
+              <SelectItem value="1m" className="rounded-lg">
                 1 Month
               </SelectItem>
-              <SelectItem value="7d" className="rounded-lg">
-                1 Week
+              <SelectItem value="3m" className="rounded-lg">
+                3 Months
+              </SelectItem>
+              <SelectItem value="6m" className="rounded-lg">
+                6 Months
+              </SelectItem>
+              <SelectItem value="1y" className="rounded-lg">
+                1 Year
+              </SelectItem>
+              <SelectItem value="5y" className="rounded-lg">
+                5 Years
               </SelectItem>
             </SelectContent>
           </Select>
