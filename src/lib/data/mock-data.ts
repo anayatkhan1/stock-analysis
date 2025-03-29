@@ -78,6 +78,34 @@ export const mockMarketIndices: MarketIndex[] = [
 	},
 ];
 
+// Mock data for Indian markets
+export const mockIndianMarketIndices: MarketIndex[] = [
+	{
+		name: "NIFTY 50",
+		value: 22456.80,
+		change: 167.45,
+		changePercent: 0.75,
+	},
+	{
+		name: "SENSEX",
+		value: 73648.62,
+		change: 601.19,
+		changePercent: 0.82,
+	},
+	{
+		name: "BANK NIFTY",
+		value: 48123.45,
+		change: -110.85,
+		changePercent: -0.23,
+	},
+	{
+		name: "NIFTY IT",
+		value: 36789.20,
+		change: 528.30,
+		changePercent: 1.45,
+	},
+];
+
 export const mockMarketSummary: MarketSummary = {
 	advancers: 2347,
 	decliners: 1853,
@@ -92,6 +120,11 @@ export const mockIndexHistoricalData = {
 	"Dow Jones": generateHistoricalData(39800, 200),
 	Nasdaq: generateHistoricalData(16300, 100),
 	"Russell 2000": generateHistoricalData(2100, 25),
+	// Indian market indices
+	"NIFTY 50": generateHistoricalData(22000, 150),
+	"SENSEX": generateHistoricalData(73000, 400),
+	"BANK NIFTY": generateHistoricalData(48000, 200),
+	"NIFTY IT": generateHistoricalData(36500, 180),
 };
 
 // Top performing stocks
@@ -231,4 +264,18 @@ export const mockSectorPerformance: SectorPerformance[] = [
 	{ sector: "Real Estate", change: -0.45 },
 	{ sector: "Materials", change: 0.23 },
 	{ sector: "Consumer Defensive", change: 0.67 },
+];
+
+// Indian sector performance
+export const mockIndianSectorPerformance: SectorPerformance[] = [
+	{ sector: "IT", change: 1.45 },
+	{ sector: "FMCG", change: 0.92 },
+	{ sector: "Auto", change: 0.65 },
+	{ sector: "Pharma", change: 0.38 },
+	{ sector: "Bank", change: -0.23 },
+	{ sector: "Metal", change: -0.87 },
+	{ sector: "Realty", change: 0.42 },
+	{ sector: "Oil & Gas", change: -0.56 },
+	{ sector: "Power", change: 0.31 },
+	{ sector: "Media", change: -0.18 },
 ];

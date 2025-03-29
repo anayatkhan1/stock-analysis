@@ -10,35 +10,70 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  CardAction,
+  CardFooter,
 } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import {
-  IconChartBar,
-  IconBuildingBank,
-  IconChartCandle,
   IconChartPie,
   IconTrendingUp,
   IconTrendingDown,
 } from "@tabler/icons-react";
+import {
+  MarketDataService,
+  formatNumber,
+  formatPercent,
+  MarketIndex,
+  SectorPerformance
+} from "@/lib/data";
 
 export default function IndianMarketsPage() {
   const [selectedIndex, setSelectedIndex] = React.useState<string>("NIFTY 50");
-  const [activeTab, setActiveTab] = React.useState<string>("overview");
+  const [indices, setIndices] = React.useState<MarketIndex[]>([]);
+  const [sectorPerformance, setSectorPerformance] = React.useState<SectorPerformance[]>([]);
+  const [isLoading, setIsLoading] = React.useState(true);
+
+  // Fetch market indices data
+  React.useEffect(() => {
+    async function fetchData() {
+      setIsLoading(true);
+      try {
+        const marketIndices = await MarketDataService.getIndianMarketIndices();
+        setIndices(marketIndices);
+
+        const sectorData = await MarketDataService.getIndianSectorPerformance();
+        setSectorPerformance(sectorData);
+      } catch (error) {
+        console.error("Failed to fetch Indian market data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchData();
+  }, []);
 
   const handleSelectIndex = (indexName: string) => {
     setSelectedIndex(indexName);
+  };
+
+  // Calculate progress values for sector performance
+  const getProgressValue = (change: number) => {
+    // Convert percentage to a 0-100 scale for the progress bar
+    const absChange = Math.abs(change);
+    // Max change we expect is around 2%, so scale accordingly
+    return Math.min(Math.round(absChange * 50), 100);
   };
 
   return (
     <>
       <div className="space-y-6">
         <div className="px-4 lg:px-6">
-          <Card className="border-0 border-0 border-0 border-0 bg-gradient-to-shadow-sm r from-orshadow-sm ange-50 tshadow-sm o-re">
+          <Card className="bg-background">
             <CardContent className="p-6">
               <div className="flex flex-col gap-2">
-                <h1 className="font-bold font-bol tracking-tight">
+                <h1 className="text-3xl font-bold tracking-tight">
                   Indian Markets
                 </h1>
                 <p className="text-muted-foreground">
@@ -50,391 +85,110 @@ export default function IndianMarketsPage() {
           </Card>
         </div>
 
-        <Tabs
-          value={activeTab}
-          onValueChange={setActiveTab}
-          className="px-4 lg:px-6"
-        >
-          <TabsList className="mb-4 mb-4 mb-4 mb-4 grid w-f">
-            <TabsTrigger value="overview" className="flex items-center gap-2">
-              <IconChartBar className="h-4 w-4" />
-              <span>Overview</span>
-            </TabsTrigger>
-            <TabsTrigger value="nse" className="flex items-center gap-2">
-              <IconBuildingBank className="h-4 w-4" />
-              <span>NSE</span>
-            </TabsTrigger>
-            <TabsTrigger value="bse" className="flex items-center gap-2">
-              <IconChartCandle className="h-4 w-4" />
-              <span>BSE</span>
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="overview" className="space-y-6">
-            <div className="grid grid-cols-1 gap-4 gap-4 gap-4 gap-4 md:grid-c-4">
-              {/* NSE Card */}
-              <Card className="data-[slot=card]:bg-gradient-to-t data-[slot=card]:from-primary/5 data-[slot=card]:to-card data-[slot=card]:shadow-xs dark:data-[slot=card]:bg-card">
-                <CardHeader className="pb-2">
-                  <CardDescription>NSE</CardDescription>
-                  <CardTitle className="font-semibold font-sem">
-                    NIFTY 50
-                  </CardTitle>
-                  <Badge
-                    variant="outline"
-                    className="een-500 text-green-500 text-green-500"
-                  >
-                    <IconTrendingUp className="mr-1 mr-1 mr" />
-                    +0.75%
-                  </Badge>
-                </CardHeader>
-                <CardContent>
-                  <div className="font-semibold font-sem">22,456.80</div>
-                  <div className="mtm1ed-foreground textextextextssm">
-                    Up 167.45 points today
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* BSE Card */}
-              <Card className="data-[slot=card]:bg-gradient-to-t data-[slot=card]:from-primary/5 data-[slot=card]:to-card data-[slot=card]:shadow-xs dark:data-[slot=card]:bg-card">
-                <CardHeader className="pb-2">
-                  <CardDescription>BSE</CardDescription>
-                  <CardTitle className="font-semibold font-sem">
-                    SENSEX
-                  </CardTitle>
-                  <Badge
-                    variant="outline"
-                    className="een-500 text-green-500 text-green-500"
-                  >
-                    <IconTrendingUp className="mr-1 mr-1 mr" />
-                    +0.82%
-                  </Badge>
-                </CardHeader>
-                <CardContent>
-                  <div className="font-semibold font-sem">73,648.62</div>
-                  <div className="mtm1ed-foreground textextextextssm">
-                    Up 601.19 points today
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Bank NIFTY Card */}
-              <Card className="data-[slot=card]:bg-gradient-to-t data-[slot=card]:from-primary/5 data-[slot=card]:to-card data-[slot=card]:shadow-xs dark:data-[slot=card]:bg-card">
-                <CardHeader className="pb-2">
-                  <CardDescription>NSE</CardDescription>
-                  <CardTitle className="font-semibold font-sem">
-                    BANK NIFTY
-                  </CardTitle>
-                  <Badge
-                    variant="outline"
-                    className="t-red-500 text-red-500 text-red-500"
-                  >
-                    <IconTrendingDown className="mr-1 mr-1 mr" />
-                    -0.23%
-                  </Badge>
-                </CardHeader>
-                <CardContent>
-                  <div className="font-semibold font-sem">48,123.45</div>
-                  <div className="mtm1ed-foreground textextextextssm">
-                    Down 110.85 points today
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* NIFTY IT Card */}
-              <Card className="data-[slot=card]:bg-gradient-to-t data-[slot=card]:from-primary/5 data-[slot=card]:to-card data-[slot=card]:shadow-xs dark:data-[slot=card]:bg-card">
-                <CardHeader className="pb-2">
-                  <CardDescription>NSE</CardDescription>
-                  <CardTitle className="font-semibold font-sem">
-                    NIFTY IT
-                  </CardTitle>
-                  <Badge
-                    variant="outline"
-                    className="een-500 text-green-500 text-green-500"
-                  >
-                    <IconTrendingUp className="mr-1 mr-1 mr" />
-                    +1.45%
-                  </Badge>
-                </CardHeader>
-                <CardContent>
-                  <div className="font-semibold font-sem">36,789.20</div>
-                  <div className="mtm1ed-foreground textextextextssm">
-                    Up 528.30 points today
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            <div className="grid grid-cols-1 gap-6">
-              <ChartAreaInteractive selectedIndex={selectedIndex} />
-
-              <div className="grid grid-cols-1 gap-6 gap-6 gap-6 ga">
-                <Card className="data-[slot=card]:bg-gradient-to-t data-[slot=card]:from-primary/5 data-[slot=card]:to-card data-[slot=card]:shadow-xs dark:data-[slot=card]:bg-card">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <IconChartPie className="h-5 w-5" />
-                      Sectoral Performance
-                    </CardTitle>
-                    <CardDescription>
-                      NSE sectoral indices performance today
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {/* IT Sector */}
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between text-sm">
-                          <div className="font-medium">IT</div>
-                          <span className="text-green-500">+1.45%</span>
-                        </div>
-                        <Progress
-                          value={85}
-                          className="h-2 bg-muted"
-                          indicatorClassName="bg-green-500"
-                        />
-                      </div>
-
-                      {/* FMCG Sector */}
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between text-sm">
-                          <div className="font-medium">FMCG</div>
-                          <span className="text-green-500">+0.92%</span>
-                        </div>
-                        <Progress
-                          value={70}
-                          className="h-2 bg-muted"
-                          indicatorClassName="bg-green-500"
-                        />
-                      </div>
-
-                      {/* Auto Sector */}
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between text-sm">
-                          <div className="font-medium">Auto</div>
-                          <span className="text-green-500">+0.65%</span>
-                        </div>
-                        <Progress
-                          value={60}
-                          className="h-2 bg-muted"
-                          indicatorClassName="bg-green-500"
-                        />
-                      </div>
-
-                      {/* Pharma Sector */}
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between text-sm">
-                          <div className="font-medium">Pharma</div>
-                          <span className="text-green-500">+0.38%</span>
-                        </div>
-                        <Progress
-                          value={45}
-                          className="h-2 bg-muted"
-                          indicatorClassName="bg-green-500"
-                        />
-                      </div>
-
-                      {/* Bank Sector */}
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between text-sm">
-                          <div className="font-medium">Bank</div>
-                          <span className="text-red-500">-0.23%</span>
-                        </div>
-                        <Progress
-                          value={30}
-                          className="h-2 bg-muted"
-                          indicatorClassName="bg-red-500"
-                        />
-                      </div>
-
-                      {/* Metal Sector */}
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between text-sm">
-                          <div className="font-medium">Metal</div>
-                          <span className="text-red-500">-0.87%</span>
-                        </div>
-                        <Progress
-                          value={15}
-                          className="h-2 bg-muted"
-                          indicatorClassName="bg-red-500"
-                        />
-                      </div>
-                    </div>
-                  </CardContent>
+        <div className="px-4 lg:px-6 space-y-6">
+          {/* Market Index Cards */}
+          {isLoading ? (
+            <div className="grid @5xl/main:grid-cols-4 @xl/main:grid-cols-2 grid-cols-1 gap-4">
+              {[1, 2, 3, 4].map(i => (
+                <Card key={i} className="h-[180px] flex items-center justify-center">
+                  <p>Loading market data...</p>
                 </Card>
-
-                <MarketSummary />
-              </div>
-
-              <StockTable />
+              ))}
             </div>
-          </TabsContent>
-
-          <TabsContent value="nse" className="space-y-6">
-            <Card className="data-[slot=card]:bg-gradient-to-t data-[slot=card]:from-primary/5 data-[slot=card]:to-card data-[slot=card]:shadow-xs dark:data-[slot=card]:bg-card">
-              <CardHeader>
-                <CardTitle>NSE Indices</CardTitle>
-                <CardDescription>
-                  National Stock Exchange of India indices
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 gap-4 gap-4 gap-4 ga">
-                  <div className="space-y-4">
-                    <h3 className="font-semibold">Broad Market Indices</h3>
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between xt-sm text-sm text-sm">
-                        <span>NIFTY 50</span>
-                        <span className="text-green-500">
-                          22,456.80 (+0.75%)
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between xt-sm text-sm text-sm">
-                        <span>NIFTY NEXT 50</span>
-                        <span className="text-green-500">
-                          63,782.15 (+0.82%)
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between xt-sm text-sm text-sm">
-                        <span>NIFTY 100</span>
-                        <span className="text-green-500">
-                          23,567.90 (+0.78%)
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between xt-sm text-sm text-sm">
-                        <span>NIFTY 200</span>
-                        <span className="text-green-500">
-                          14,321.45 (+0.71%)
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between xt-sm text-sm text-sm">
-                        <span>NIFTY 500</span>
-                        <span className="text-green-500">
-                          21,876.30 (+0.68%)
-                        </span>
-                      </div>
+          ) : (
+            <div className="grid @5xl/main:grid-cols-4 @xl/main:grid-cols-2 grid-cols-1 gap-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card *:data-[slot=card]:shadow-xs dark:*:data-[slot=card]:bg-card">
+              {indices.map(index => (
+                <Card
+                  key={index.name}
+                  className="@container/card cursor-pointer transition-all hover:shadow-md"
+                  onClick={() => handleSelectIndex(index.name)}
+                >
+                  <CardHeader>
+                    <CardDescription>{index.name === "NIFTY 50" || index.name === "BANK NIFTY" || index.name === "NIFTY IT" ? "NSE" : "BSE"}</CardDescription>
+                    <CardTitle className="font-semibold @[250px]/card:text-3xl text-2xl tabular-nums">
+                      {formatNumber(index.value)}
+                    </CardTitle>
+                    <CardAction>
+                      <Badge
+                        variant="outline"
+                        className={index.changePercent > 0 ? "text-green-500" : "text-red-500"}
+                      >
+                        {index.changePercent > 0 ? <IconTrendingUp /> : <IconTrendingDown />}
+                        {formatPercent(index.changePercent)}
+                      </Badge>
+                    </CardAction>
+                  </CardHeader>
+                  <CardFooter className="flex-col items-start gap-1.5 text-sm">
+                    <div className="line-clamp-1 flex gap-2 font-medium">
+                      {index.change > 0 ? (
+                        <>
+                          Up {formatNumber(index.change)} points{" "}
+                          <IconTrendingUp className="size-4 text-green-500" />
+                        </>
+                      ) : (
+                        <>
+                          Down {formatNumber(Math.abs(index.change))} points{" "}
+                          <IconTrendingDown className="size-4 text-red-500" />
+                        </>
+                      )}
                     </div>
-                  </div>
-
-                  <div className="space-y-4">
-                    <h3 className="font-semibold">Sectoral Indices</h3>
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between xt-sm text-sm text-sm">
-                        <span>NIFTY BANK</span>
-                        <span className="text-red-500">48,123.45 (-0.23%)</span>
-                      </div>
-                      <div className="flex items-center justify-between xt-sm text-sm text-sm">
-                        <span>NIFTY IT</span>
-                        <span className="text-green-500">
-                          36,789.20 (+1.45%)
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between xt-sm text-sm text-sm">
-                        <span>NIFTY FMCG</span>
-                        <span className="text-green-500">
-                          52,345.67 (+0.92%)
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between xt-sm text-sm text-sm">
-                        <span>NIFTY AUTO</span>
-                        <span className="text-green-500">
-                          19,876.54 (+0.65%)
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between xt-sm text-sm text-sm">
-                        <span>NIFTY PHARMA</span>
-                        <span className="text-green-500">
-                          17,654.32 (+0.38%)
-                        </span>
-                      </div>
+                    <div className="text-muted-foreground">
+                      {index.name}
                     </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+                  </CardFooter>
+                </Card>
+              ))}
+            </div>
+          )}
 
-          <TabsContent value="bse" className="space-y-6">
-            <Card className="data-[slot=card]:bg-gradient-to-t data-[slot=card]:from-primary/5 data-[slot=card]:to-card data-[slot=card]:shadow-xs dark:data-[slot=card]:bg-card">
-              <CardHeader>
-                <CardTitle>BSE Indices</CardTitle>
-                <CardDescription>Bombay Stock Exchange indices</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 gap-4 gap-4 gap-4 ga">
-                  <div className="space-y-4">
-                    <h3 className="font-semibold">Broad Market Indices</h3>
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between xt-sm text-sm text-sm">
-                        <span>SENSEX</span>
-                        <span className="text-green-500">
-                          73,648.62 (+0.82%)
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between xt-sm text-sm text-sm">
-                        <span>BSE 100</span>
-                        <span className="text-green-500">
-                          24,567.89 (+0.79%)
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between xt-sm text-sm text-sm">
-                        <span>BSE 200</span>
-                        <span className="text-green-500">
-                          15,432.10 (+0.73%)
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between xt-sm text-sm text-sm">
-                        <span>BSE 500</span>
-                        <span className="text-green-500">
-                          22,345.67 (+0.70%)
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between xt-sm text-sm text-sm">
-                        <span>BSE MIDCAP</span>
-                        <span className="text-green-500">
-                          34,567.89 (+0.65%)
-                        </span>
-                      </div>
-                    </div>
-                  </div>
+          <div className="grid grid-cols-1 gap-6">
+            <ChartAreaInteractive selectedIndex={selectedIndex} />
 
-                  <div className="space-y-4">
-                    <h3 className="font-semibold">Sectoral Indices</h3>
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between xt-sm text-sm text-sm">
-                        <span>BSE BANKEX</span>
-                        <span className="text-red-500">49,876.54 (-0.18%)</span>
-                      </div>
-                      <div className="flex items-center justify-between xt-sm text-sm text-sm">
-                        <span>BSE IT</span>
-                        <span className="text-green-500">
-                          37,654.32 (+1.42%)
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between xt-sm text-sm text-sm">
-                        <span>BSE FMCG</span>
-                        <span className="text-green-500">
-                          18,765.43 (+0.90%)
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between xt-sm text-sm text-sm">
-                        <span>BSE AUTO</span>
-                        <span className="text-green-500">
-                          51,234.56 (+0.62%)
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between xt-sm text-sm text-sm">
-                        <span>BSE HEALTHCARE</span>
-                        <span className="text-green-500">
-                          28,765.43 (+0.35%)
-                        </span>
-                      </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Sectoral Performance Card */}
+              <Card className="data-[slot=card]:bg-gradient-to-t data-[slot=card]:from-primary/5 data-[slot=card]:to-card data-[slot=card]:shadow-xs dark:data-[slot=card]:bg-card">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <IconChartPie className="h-5 w-5" />
+                    Sectoral Performance
+                  </CardTitle>
+                  <CardDescription>
+                    NSE sectoral indices performance today
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {isLoading ? (
+                    <div className="flex items-center justify-center h-[200px]">
+                      <p>Loading sector data...</p>
                     </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+                  ) : (
+                    <div className="space-y-4">
+                      {sectorPerformance.map(sector => (
+                        <div key={sector.sector} className="space-y-2">
+                          <div className="flex items-center justify-between text-sm">
+                            <div className="font-medium">{sector.sector}</div>
+                            <span className={sector.change > 0 ? "text-green-500" : "text-red-500"}>
+                              {formatPercent(sector.change)}
+                            </span>
+                          </div>
+                          <Progress
+                            value={getProgressValue(sector.change)}
+                            className="h-2 bg-muted"
+                            indicatorClassName={sector.change > 0 ? "bg-green-500" : "bg-red-500"}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              <MarketSummary />
+            </div>
+
+            <StockTable />
+          </div>
+        </div>
       </div>
     </>
   );
