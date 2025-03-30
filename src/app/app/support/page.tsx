@@ -1,12 +1,24 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Mail, MessageSquare, Phone } from "lucide-react";
 
 export default function SupportPage() {
@@ -19,13 +31,12 @@ export default function SupportPage() {
         </p>
       </div>
 
-      <Tabs defaultValue="contact" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+      <Tabs defaultValue="contact">
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="contact">Contact Us</TabsTrigger>
           <TabsTrigger value="faq">FAQ</TabsTrigger>
-          <TabsTrigger value="documentation">Documentation</TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="contact" className="space-y-4 pt-4">
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             <Card>
@@ -42,7 +53,7 @@ export default function SupportPage() {
                 <p className="text-sm font-medium">support@stockanalysis.com</p>
               </CardContent>
             </Card>
-            
+
             <Card>
               <CardHeader className="pb-3">
                 <div className="flex items-center gap-2 mb-2">
@@ -57,7 +68,7 @@ export default function SupportPage() {
                 <p className="text-sm font-medium">+1 (555) 123-4567</p>
               </CardContent>
             </Card>
-            
+
             <Card>
               <CardHeader className="pb-3">
                 <div className="flex items-center gap-2 mb-2">
@@ -73,12 +84,13 @@ export default function SupportPage() {
               </CardContent>
             </Card>
           </div>
-          
+
           <Card>
             <CardHeader>
               <CardTitle>Contact Form</CardTitle>
               <CardDescription>
-                Fill out the form below and we'll get back to you as soon as possible.
+                Fill out the form below and we'll get back to you as soon as
+                possible.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -110,7 +122,7 @@ export default function SupportPage() {
             </CardFooter>
           </Card>
         </TabsContent>
-        
+
         <TabsContent value="faq" className="space-y-4 pt-4">
           <Card>
             <CardHeader>
@@ -122,112 +134,56 @@ export default function SupportPage() {
             <CardContent>
               <Accordion type="single" collapsible className="w-full">
                 <AccordionItem value="item-1">
-                  <AccordionTrigger>How do I reset my password?</AccordionTrigger>
+                  <AccordionTrigger>
+                    How do I reset my password?
+                  </AccordionTrigger>
                   <AccordionContent>
-                    To reset your password, click on the "Forgot Password" link on the login page. 
-                    You'll receive an email with instructions to create a new password.
+                    To reset your password, click on the "Forgot Password" link
+                    on the login page. You'll receive an email with instructions
+                    to create a new password.
                   </AccordionContent>
                 </AccordionItem>
                 <AccordionItem value="item-2">
-                  <AccordionTrigger>What data sources do you use?</AccordionTrigger>
+                  <AccordionTrigger>
+                    What data sources do you use?
+                  </AccordionTrigger>
                   <AccordionContent>
-                    We use a combination of real-time and delayed market data from various exchanges 
-                    and financial data providers to ensure accuracy and reliability.
+                    We use a combination of real-time and delayed market data
+                    from various exchanges and financial data providers to
+                    ensure accuracy and reliability.
                   </AccordionContent>
                 </AccordionItem>
                 <AccordionItem value="item-3">
-                  <AccordionTrigger>How often is the data updated?</AccordionTrigger>
+                  <AccordionTrigger>
+                    How often is the data updated?
+                  </AccordionTrigger>
                   <AccordionContent>
-                    Market data is updated in real-time during market hours. Financial statements 
-                    and other fundamental data are updated quarterly or as soon as companies release 
-                    new information.
+                    Market data is updated in real-time during market hours.
+                    Financial statements and other fundamental data are updated
+                    quarterly or as soon as companies release new information.
                   </AccordionContent>
                 </AccordionItem>
                 <AccordionItem value="item-4">
-                  <AccordionTrigger>Can I export data to Excel?</AccordionTrigger>
+                  <AccordionTrigger>
+                    Can I export data to Excel?
+                  </AccordionTrigger>
                   <AccordionContent>
-                    Yes, most data tables in our platform have an export option that allows you to 
-                    download the information in CSV or Excel format.
+                    Yes, most data tables in our platform have an export option
+                    that allows you to download the information in CSV or Excel
+                    format.
                   </AccordionContent>
                 </AccordionItem>
                 <AccordionItem value="item-5">
-                  <AccordionTrigger>Is there a mobile app available?</AccordionTrigger>
+                  <AccordionTrigger>
+                    Is there a mobile app available?
+                  </AccordionTrigger>
                   <AccordionContent>
-                    We currently offer a responsive web application that works well on mobile devices. 
-                    A dedicated mobile app is in development and will be released soon.
+                    We currently offer a responsive web application that works
+                    well on mobile devices. A dedicated mobile app is in
+                    development and will be released soon.
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="documentation" className="space-y-4 pt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Documentation</CardTitle>
-              <CardDescription>
-                Explore our comprehensive guides and tutorials.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid gap-4 md:grid-cols-2">
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-lg">Getting Started Guide</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground">
-                      Learn the basics of navigating and using our platform.
-                    </p>
-                  </CardContent>
-                  <CardFooter>
-                    <Button variant="outline" className="w-full">Read Guide</Button>
-                  </CardFooter>
-                </Card>
-                
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-lg">Technical Analysis</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground">
-                      Understand how to use our technical analysis tools effectively.
-                    </p>
-                  </CardContent>
-                  <CardFooter>
-                    <Button variant="outline" className="w-full">Read Guide</Button>
-                  </CardFooter>
-                </Card>
-                
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-lg">Fundamental Analysis</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground">
-                      Learn how to analyze company financials and valuation metrics.
-                    </p>
-                  </CardContent>
-                  <CardFooter>
-                    <Button variant="outline" className="w-full">Read Guide</Button>
-                  </CardFooter>
-                </Card>
-                
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-lg">API Documentation</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground">
-                      Integrate with our platform using our comprehensive API.
-                    </p>
-                  </CardContent>
-                  <CardFooter>
-                    <Button variant="outline" className="w-full">Read Guide</Button>
-                  </CardFooter>
-                </Card>
-              </div>
             </CardContent>
           </Card>
         </TabsContent>
