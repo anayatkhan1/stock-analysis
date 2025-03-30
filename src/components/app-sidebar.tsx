@@ -1,28 +1,18 @@
-"use client"
-
-import * as React from "react"
+"use client";
 import {
-  IconCamera,
-  IconChartBar,
-  IconDashboard,
-  IconDatabase,
-  IconFileAi,
-  IconFileDescription,
-  IconFileWord,
-  IconFolder,
-  IconHelp,
-  IconInnerShadowTop,
-  IconListDetails,
-  IconReport,
-  IconSearch,
-  IconSettings,
-  IconUsers,
-} from "@tabler/icons-react"
-
-import { NavDocuments } from "@/components/nav-documents"
-import { NavMain } from "@/components/nav-main"
-import { NavSecondary } from "@/components/nav-secondary"
-import { NavUser } from "@/components/nav-user"
+  BarChart2,
+  Command,
+  DollarSign,
+  FileText,
+  Frame,
+  Globe,
+  LifeBuoy,
+  LineChart,
+  Map,
+  PieChart,
+  Send,
+  TrendingUp,
+} from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -31,151 +21,148 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
+import { NavMain } from "./nav-main";
+import { NavSecondary } from "./nav-secondary";
+import { NavUser } from "./nav-user";
+import Link from "next/link";
 
-const data = {
+export const navigationData = {
   user: {
     name: "shadcn",
     email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
+    avatar: "https://github.com/shadcn.png",
   },
   navMain: [
     {
-      title: "Dashboard",
-      url: "#",
-      icon: IconDashboard,
-    },
-    {
-      title: "Lifecycle",
-      url: "#",
-      icon: IconListDetails,
-    },
-    {
-      title: "Analytics",
-      url: "#",
-      icon: IconChartBar,
-    },
-    {
-      title: "Projects",
-      url: "#",
-      icon: IconFolder,
-    },
-    {
-      title: "Team",
-      url: "#",
-      icon: IconUsers,
-    },
-  ],
-  navClouds: [
-    {
-      title: "Capture",
-      icon: IconCamera,
-      isActive: true,
-      url: "#",
+      label: "",
       items: [
         {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
+          name: "Overview",
+          url: "/app",
+          icon: Globe,
         },
       ],
     },
     {
-      title: "Proposal",
-      icon: IconFileDescription,
-      url: "#",
+      label: "Markets",
       items: [
         {
-          title: "Active Proposals",
-          url: "#",
+          name: "Global Markets",
+          url: "/app/global",
+          icon: Globe,
         },
         {
-          title: "Archived",
-          url: "#",
+          name: "Indian Markets",
+          url: "/app/indian",
+          icon: BarChart2,
         },
       ],
     },
     {
-      title: "Prompts",
-      icon: IconFileAi,
-      url: "#",
+      label: "Technical Analysis",
       items: [
         {
-          title: "Active Proposals",
-          url: "#",
+          name: "Stock Scanner",
+          url: "/app/stock-scanner",
+          icon: LineChart,
+        },
+      ],
+    },
+    {
+      label: "Fundamental Analysis",
+      items: [
+        {
+          name: "Financial Reports",
+          url: "/app/fundamentals/reports",
+          icon: FileText,
+          disabled: true,
+          tooltip: "Coming Soon",
         },
         {
-          title: "Archived",
-          url: "#",
+          name: "Balance Sheets",
+          url: "/app/fundamentals/balance",
+          icon: DollarSign,
+          disabled: true,
+          tooltip: "Coming Soon",
+        },
+        {
+          name: "Profit and Loss",
+          url: "/app/fundamentals/profit-loss",
+          icon: TrendingUp,
+          disabled: true,
+          tooltip: "Coming Soon",
         },
       ],
     },
   ],
   navSecondary: [
     {
-      title: "Settings",
-      url: "#",
-      icon: IconSettings,
+      title: "Support",
+      url: "/app/support",
+      icon: LifeBuoy,
     },
     {
-      title: "Get Help",
-      url: "#",
-      icon: IconHelp,
-    },
-    {
-      title: "Search",
-      url: "#",
-      icon: IconSearch,
+      title: "Feedback",
+      url: "/app/feedback",
+      icon: Send,
     },
   ],
-  documents: [
+  projects: [
     {
-      name: "Data Library",
-      url: "#",
-      icon: IconDatabase,
+      name: "Design Engineering",
+      url: "/app/projects/design",
+      icon: Frame,
     },
     {
-      name: "Reports",
-      url: "#",
-      icon: IconReport,
+      name: "Sales & Marketing",
+      url: "/app/projects/sales",
+      icon: PieChart,
     },
     {
-      name: "Word Assistant",
-      url: "#",
-      icon: IconFileWord,
+      name: "Travel",
+      url: "/app/projects/travel",
+      icon: Map,
     },
   ],
+};
+
+interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
+  pathname?: string;
 }
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar({ pathname = "", ...props }: AppSidebarProps) {
   return (
-    <Sidebar collapsible="offcanvas" {...props}>
+    <Sidebar variant="inset" collapsible="icon" {...props}>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton
-              asChild
-              className="data-[slot=sidebar-menu-button]:!p-1.5"
-            >
-              <a href="#">
-                <IconInnerShadowTop className="!size-5" />
-                <span className="text-base font-semibold">Acme Inc.</span>
-              </a>
+            <SidebarMenuButton size="lg" asChild>
+              <Link href="/app">
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                  <Command className="size-4" />
+                </div>
+                <div className="grid flex-1 text-left text-sm leading-tight">
+                  <span className="truncate font-semibold">Stock analysis</span>
+                  <span className="truncate text-xs">Platform</span>
+                </div>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
-        <NavDocuments items={data.documents} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
+        <NavMain items={navigationData.navMain} currentPath={pathname} />
+        {/* <NavProjects projects={navigationData.projects} /> */}
+        <NavSecondary
+          items={navigationData.navSecondary}
+          className="mt-auto"
+          currentPath={pathname}
+        />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser user={navigationData.user} />
       </SidebarFooter>
     </Sidebar>
-  )
+  );
 }
