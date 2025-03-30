@@ -1,3 +1,4 @@
+import CallToAction from "@/components/call-to-action";
 import ContentSection from "@/components/content-7";
 import FAQs from "@/components/faqs";
 import FeaturesSection from "@/components/features-9";
@@ -16,6 +17,7 @@ const LandingPage = () => {
       <Testimonials />
       <Pricing />
       <FAQs />
+      <CallToAction />
     </div>
   );
 };
