@@ -1,24 +1,33 @@
-import Link from "next/link";
+import CallToAction from "@/components/call-to-action";
+import ContentSection from "@/components/content-7";
+import FAQs from "@/components/faqs";
+import FeaturesSection from "@/components/features-9";
+import FooterSection from "@/components/footer";
+import HeroSection from "@/components/hero-section";
+import Pricing from "@/components/pricing";
+import StatsSection from "@/components/stats";
+import Testimonials from "@/components/testimonials";
 
 const LandingPage = () => {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center text-center">
-      <div className="container px-5 py-24">
-        <h1 className="mb-6 font-bold text-5xl leading-tight sm:text-6xl">
-          Stock Analysis Plafont-bold tform
-        </h1>
-        <p className="mb-8 text-xl">
-          Powerful analytics and insights for your investment decisions
-        </p>
-        <div className="flex justify-center">
-          <Link
-            href="/app"
-            className="rounded-lg bg-primary px-8 py-3 font-semibold text-lg text-primary-foreground hover:bg-primary/90"
-          >
-            font-semibold Enter Application
-          </Link>
-        </div>
+    <div className="h-screen">
+      <HeroSection />
+      <div id="features">
+        <FeaturesSection />
       </div>
+      <div id="content">
+        <ContentSection />
+      </div>
+      <StatsSection />
+      <Testimonials />
+      <div id="pricing">
+        <Pricing />
+      </div>
+      <div id="about">
+        <FAQs />
+      </div>
+      <CallToAction />
+      <FooterSection />
     </div>
   );
 };
