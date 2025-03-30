@@ -5,6 +5,7 @@ import Image from "next/image";
 import { HeroHeader } from "@/components/hero5-header";
 import { TextEffect } from "./ui/text-effect";
 import { AnimatedGroup } from "./ui/animated-group";
+
 const transitionVariants = {
   item: {
     hidden: {
