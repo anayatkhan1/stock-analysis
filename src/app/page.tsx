@@ -1,6 +1,7 @@
 import ContentSection from "@/components/content-7";
 import FeaturesSection from "@/components/features-9";
 import HeroSection from "@/components/hero-section";
+import StatsSection from "@/components/stats";
 
 const LandingPage = () => {
   return (
@@ -8,6 +9,7 @@ const LandingPage = () => {
       <HeroSection />
       <FeaturesSection />
       <ContentSection />
+      <StatsSection />
     </div>
   );
 };
