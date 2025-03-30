@@ -10,12 +10,18 @@ import {
   SidebarMenuButton,
   useSidebar,
 } from "@/components/ui/sidebar";
-
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface NavItem {
   name: string;
   url: string;
   icon?: LucideIcon;
+  disabled?: boolean;
+  tooltip?: string;
 }
 
 interface NavSection {
@@ -39,8 +45,11 @@ export function NavMain({ items, currentPath = "", className }: NavMainProps) {
     }
 
     // For other pages, check if the current path matches exactly or is a subpath
-    if (url !== "/app" && (currentPath === url ||
-        (currentPath.startsWith(url) && currentPath.charAt(url.length) === '/'))) {
+    if (
+      url !== "/app" &&
+      (currentPath === url ||
+        (currentPath.startsWith(url) && currentPath.charAt(url.length) === "/"))
+    ) {
       return true;
     }
 
@@ -58,16 +67,34 @@ export function NavMain({ items, currentPath = "", className }: NavMainProps) {
           <SidebarMenu>
             {section.items.map(item => (
               <SidebarMenuItem key={item.name}>
-                <SidebarMenuButton asChild isActive={isActive(item.url)}>
-                  <Link href={item.url} className="flex items-center gap-2">
-                    {item.icon && (
-                      <div className="flex size-5 items-center justify-center">
-                        <item.icon className="size-4" />
+                {item.disabled ? (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="flex items-center text-sm gap-2 px-3 py-2 cursor-not-allowed opacity-50">
+                        {item.icon && (
+                          <div className="flex size-5 items-center justify-center">
+                            <item.icon className="size-4" />
+                          </div>
+                        )}
+                        <span>{item.name}</span>
                       </div>
-                    )}
-                    <span>{item.name}</span>
-                  </Link>
-                </SidebarMenuButton>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{item.tooltip || "Coming Soon"}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                ) : (
+                  <SidebarMenuButton asChild isActive={isActive(item.url)}>
+                    <Link href={item.url} className="flex items-center gap-2">
+                      {item.icon && (
+                        <div className="flex items-center justify-center">
+                          <item.icon className="w-4 h" />
+                        </div>
+                      )}
+                      <span>{item.name}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                )}
               </SidebarMenuItem>
             ))}
           </SidebarMenu>
