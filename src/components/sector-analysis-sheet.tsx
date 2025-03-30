@@ -15,6 +15,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 import { MarketDataService, formatPercent, formatNumber } from "@/lib/data";
 import type {
@@ -130,8 +135,18 @@ export function SectorAnalysisSheet({
             // or overbought (high RSI, potential sell)
             analyzedStocks = [...allStocksInSector].sort((a, b) => {
               // Prioritize stocks with extreme price movements (potential oversold/overbought)
-              const aExtreme = Math.abs(a.changePercent) > 5 ? 2 : Math.abs(a.changePercent) > 3 ? 1 : 0;
-              const bExtreme = Math.abs(b.changePercent) > 5 ? 2 : Math.abs(b.changePercent) > 3 ? 1 : 0;
+              const aExtreme =
+                Math.abs(a.changePercent) > 5
+                  ? 2
+                  : Math.abs(a.changePercent) > 3
+                  ? 1
+                  : 0;
+              const bExtreme =
+                Math.abs(b.changePercent) > 5
+                  ? 2
+                  : Math.abs(b.changePercent) > 3
+                  ? 1
+                  : 0;
 
               // If both stocks have similar extremeness, sort by absolute change percent
               if (aExtreme === bExtreme) {
@@ -173,8 +188,10 @@ export function SectorAnalysisSheet({
             // but also consider their price change direction
             analyzedStocks = [...allStocksInSector].sort((a, b) => {
               // Calculate volatility score (higher absolute change with higher volume is better)
-              const aVolatility = Math.abs(a.change) * Math.log10(a.volume || 1);
-              const bVolatility = Math.abs(b.change) * Math.log10(b.volume || 1);
+              const aVolatility =
+                Math.abs(a.change) * Math.log10(a.volume || 1);
+              const bVolatility =
+                Math.abs(b.change) * Math.log10(b.volume || 1);
 
               return bVolatility - aVolatility;
             });
@@ -195,7 +212,7 @@ export function SectorAnalysisSheet({
           default:
             // Default sorting by market cap
             analyzedStocks = [...allStocksInSector].sort(
-              (a, b) => b.marketCap - a.marketCap
+              (a, b) => b.marketCap - a.marketCap,
             );
         }
 
@@ -759,7 +776,8 @@ export function SectorAnalysisSheet({
                             Apply Technical Indicator to Stocks
                           </h3>
                           <p className="text-sm text-muted-foreground">
-                            Select a technical indicator to analyze stocks in this sector
+                            Select a technical indicator to analyze stocks in
+                            this sector
                           </p>
                         </div>
                         <Badge variant="outline" className="capitalize">
@@ -767,26 +785,27 @@ export function SectorAnalysisSheet({
                         </Badge>
                       </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-                        {indicators.map((indicator) => (
-                          <div
-                            key={indicator.id}
-                            className={`border rounded-md p-3 cursor-pointer transition-all hover:border-primary ${
-                              selectedIndicator === indicator.id ? 'border-primary bg-primary/5' : ''
-                            }`}
-                            onClick={() => setSelectedIndicator(indicator.id)}
+                      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-end">
+                        <div className="w-full">
+                          <Select
+                            value={selectedIndicator}
+                            onValueChange={setSelectedIndicator}
                           >
-                            <div className="flex items-center justify-between mb-1">
-                              <h4 className="font-medium">{indicator.name}</h4>
-                              <Badge variant="outline" className="capitalize text-xs">
-                                {indicator.type}
-                              </Badge>
-                            </div>
-                            <p className="text-xs text-muted-foreground line-clamp-2">
-                              {indicator.description}
-                            </p>
-                          </div>
-                        ))}
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Select indicator" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {indicators.map(indicator => (
+                                <SelectItem
+                                  key={indicator.id}
+                                  value={indicator.id}
+                                >
+                                  {indicator.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
                       </div>
 
                       {selectedIndicatorDetails && (
@@ -805,11 +824,17 @@ export function SectorAnalysisSheet({
 
                           <div className="mt-3 flex items-center justify-between">
                             <div className="text-sm">
-                              <span className="text-muted-foreground">Best for: </span>
-                              {selectedIndicatorDetails.type === 'momentum' && 'Identifying overbought/oversold conditions'}
-                              {selectedIndicatorDetails.type === 'trend' && 'Following market direction'}
-                              {selectedIndicatorDetails.type === 'volatility' && 'Measuring price fluctuations'}
-                              {selectedIndicatorDetails.type === 'volume' && 'Tracking trading activity'}
+                              <span className="text-muted-foreground">
+                                Best for:{" "}
+                              </span>
+                              {selectedIndicatorDetails.type === "momentum" &&
+                                "Identifying overbought/oversold conditions"}
+                              {selectedIndicatorDetails.type === "trend" &&
+                                "Following market direction"}
+                              {selectedIndicatorDetails.type === "volatility" &&
+                                "Measuring price fluctuations"}
+                              {selectedIndicatorDetails.type === "volume" &&
+                                "Tracking trading activity"}
                             </div>
                             <Button
                               onClick={applyTechnicalAnalysis}
@@ -817,7 +842,9 @@ export function SectorAnalysisSheet({
                               className="flex items-center gap-2"
                             >
                               {isAnalyzing ? "Analyzing..." : "Apply Analysis"}
-                              {!isAnalyzing && <IconFilter className="h-4 w-4" />}
+                              {!isAnalyzing && (
+                                <IconFilter className="h-4 w-4" />
+                              )}
                             </Button>
                           </div>
                         </div>
@@ -826,7 +853,10 @@ export function SectorAnalysisSheet({
                       {isAnalyzing && (
                         <div className="py-8 space-y-4">
                           <div className="flex flex-col items-center justify-center">
-                            <p className="text-sm font-medium mb-3">Analyzing {allStocksInSector.length} stocks with {selectedIndicatorDetails?.name}</p>
+                            <p className="text-sm font-medium mb-3">
+                              Analyzing {allStocksInSector.length} stocks with{" "}
+                              {selectedIndicatorDetails?.name}
+                            </p>
                             <Progress value={65} className="w-full h-2" />
                           </div>
                         </div>
@@ -843,14 +873,12 @@ export function SectorAnalysisSheet({
                                   Analysis Results
                                 </h3>
                                 <p className="text-sm text-muted-foreground">
-                                  Stocks ranked by {selectedIndicatorDetails?.name}
+                                  Stocks ranked by{" "}
+                                  {selectedIndicatorDetails?.name}
                                 </p>
                               </div>
                               <div className="flex items-center gap-2">
-                                <Badge
-                                  variant="outline"
-                                  className="capitalize"
-                                >
+                                <Badge variant="outline" className="capitalize">
                                   {selectedIndicatorDetails?.type || "analysis"}
                                 </Badge>
                                 <Button
@@ -881,7 +909,14 @@ export function SectorAnalysisSheet({
                                           <h4 className="font-medium">
                                             {stock.symbol}
                                           </h4>
-                                          <Badge variant={stock.changePercent > 0 ? "default" : "destructive"} className="text-xs">
+                                          <Badge
+                                            variant={
+                                              stock.changePercent > 0
+                                                ? "default"
+                                                : "destructive"
+                                            }
+                                            className="text-xs"
+                                          >
                                             {formatPercent(stock.changePercent)}
                                           </Badge>
                                         </div>
@@ -891,36 +926,64 @@ export function SectorAnalysisSheet({
                                       </div>
                                     </div>
                                     <div className="text-right">
-                                      <div className="font-medium">${formatNumber(stock.price)}</div>
-                                      <div className="text-xs text-muted-foreground">Market Cap: ${stock.marketCap}B</div>
+                                      <div className="font-medium">
+                                        ${formatNumber(stock.price)}
+                                      </div>
+                                      <div className="text-xs text-muted-foreground">
+                                        Market Cap: ${stock.marketCap}B
+                                      </div>
                                     </div>
                                   </div>
 
                                   <div className="mt-3 pt-3 border-t grid grid-cols-3 gap-3 text-xs">
                                     <div>
-                                      <div className="text-muted-foreground mb-1">Volume</div>
-                                      <div className="font-medium">{stock.volume}M</div>
+                                      <div className="text-muted-foreground mb-1">
+                                        Volume
+                                      </div>
+                                      <div className="font-medium">
+                                        {stock.volume}M
+                                      </div>
                                     </div>
                                     <div>
-                                      <div className="text-muted-foreground mb-1">P/E Ratio</div>
-                                      <div className="font-medium">{stock.pe.toFixed(2)}</div>
+                                      <div className="text-muted-foreground mb-1">
+                                        P/E Ratio
+                                      </div>
+                                      <div className="font-medium">
+                                        {stock.pe.toFixed(2)}
+                                      </div>
                                     </div>
                                     <div>
-                                      <div className="text-muted-foreground mb-1">Last Updated</div>
-                                      <div className="font-medium">{new Date(stock.lastUpdated).toLocaleDateString()}</div>
+                                      <div className="text-muted-foreground mb-1">
+                                        Last Updated
+                                      </div>
+                                      <div className="font-medium">
+                                        {new Date(
+                                          stock.lastUpdated,
+                                        ).toLocaleDateString()}
+                                      </div>
                                     </div>
                                   </div>
 
                                   <div className="mt-3 pt-3 border-t">
-                                    {selectedIndicator === 'rsi' && (
+                                    {selectedIndicator === "rsi" && (
                                       <>
-                                        <div className="text-xs text-muted-foreground mb-1">RSI Indicator</div>
+                                        <div className="text-xs text-muted-foreground mb-1">
+                                          RSI Indicator
+                                        </div>
                                         <div className="h-2 bg-muted rounded-full w-full relative">
                                           <div
                                             className={`absolute h-full rounded-full ${
-                                              Math.abs(stock.changePercent) > 5 ? 'bg-red-500' : 'bg-green-500'
+                                              Math.abs(stock.changePercent) > 5
+                                                ? "bg-red-500"
+                                                : "bg-green-500"
                                             }`}
-                                            style={{ width: `${Math.min(Math.abs(stock.changePercent) * 10, 100)}%` }}
+                                            style={{
+                                              width: `${Math.min(
+                                                Math.abs(stock.changePercent) *
+                                                  10,
+                                                100,
+                                              )}%`,
+                                            }}
                                           />
                                         </div>
                                         <div className="flex justify-between text-xs mt-1">
@@ -931,33 +994,60 @@ export function SectorAnalysisSheet({
                                       </>
                                     )}
 
-                                    {selectedIndicator === 'macd' && (
+                                    {selectedIndicator === "macd" && (
                                       <>
-                                        <div className="text-xs text-muted-foreground mb-1">Momentum Strength</div>
+                                        <div className="text-xs text-muted-foreground mb-1">
+                                          Momentum Strength
+                                        </div>
                                         <div className="flex items-center gap-2">
                                           <div className="h-2 bg-muted rounded-full w-full relative">
                                             <div
                                               className={`absolute h-full rounded-full ${
-                                                stock.changePercent > 0 ? 'bg-green-500' : 'bg-red-500'
+                                                stock.changePercent > 0
+                                                  ? "bg-green-500"
+                                                  : "bg-red-500"
                                               }`}
-                                              style={{ width: `${Math.min(Math.abs(stock.changePercent) * 15, 100)}%` }}
+                                              style={{
+                                                width: `${Math.min(
+                                                  Math.abs(
+                                                    stock.changePercent,
+                                                  ) * 15,
+                                                  100,
+                                                )}%`,
+                                              }}
                                             />
                                           </div>
-                                          <Badge variant={stock.changePercent > 0 ? "default" : "destructive"} className="text-xs">
-                                            {stock.changePercent > 0 ? "Bullish" : "Bearish"}
+                                          <Badge
+                                            variant={
+                                              stock.changePercent > 0
+                                                ? "default"
+                                                : "destructive"
+                                            }
+                                            className="text-xs"
+                                          >
+                                            {stock.changePercent > 0
+                                              ? "Bullish"
+                                              : "Bearish"}
                                           </Badge>
                                         </div>
                                       </>
                                     )}
 
-                                    {selectedIndicator === 'sma' && (
+                                    {selectedIndicator === "sma" && (
                                       <>
-                                        <div className="text-xs text-muted-foreground mb-1">Value Rating</div>
+                                        <div className="text-xs text-muted-foreground mb-1">
+                                          Value Rating
+                                        </div>
                                         <div className="flex items-center gap-2">
                                           <div className="h-2 bg-muted rounded-full w-full relative">
                                             <div
                                               className="absolute h-full rounded-full bg-blue-500"
-                                              style={{ width: `${Math.max(100 - (stock.pe / 30) * 100, 0)}%` }}
+                                              style={{
+                                                width: `${Math.max(
+                                                  100 - (stock.pe / 30) * 100,
+                                                  0,
+                                                )}%`,
+                                              }}
                                             />
                                           </div>
                                           <span className="text-xs font-medium">
@@ -967,14 +1057,21 @@ export function SectorAnalysisSheet({
                                       </>
                                     )}
 
-                                    {selectedIndicator === 'bb' && (
+                                    {selectedIndicator === "bb" && (
                                       <>
-                                        <div className="text-xs text-muted-foreground mb-1">Volatility</div>
+                                        <div className="text-xs text-muted-foreground mb-1">
+                                          Volatility
+                                        </div>
                                         <div className="flex items-center gap-2">
                                           <div className="h-2 bg-muted rounded-full w-full relative">
                                             <div
                                               className="absolute h-full rounded-full bg-purple-500"
-                                              style={{ width: `${Math.min(Math.abs(stock.change) * 50, 100)}%` }}
+                                              style={{
+                                                width: `${Math.min(
+                                                  Math.abs(stock.change) * 50,
+                                                  100,
+                                                )}%`,
+                                              }}
                                             />
                                           </div>
                                           <span className="text-xs font-medium">
@@ -984,14 +1081,21 @@ export function SectorAnalysisSheet({
                                       </>
                                     )}
 
-                                    {selectedIndicator === 'obv' && (
+                                    {selectedIndicator === "obv" && (
                                       <>
-                                        <div className="text-xs text-muted-foreground mb-1">Volume Analysis</div>
+                                        <div className="text-xs text-muted-foreground mb-1">
+                                          Volume Analysis
+                                        </div>
                                         <div className="flex items-center gap-2">
                                           <div className="h-2 bg-muted rounded-full w-full relative">
                                             <div
                                               className="absolute h-full rounded-full bg-amber-500"
-                                              style={{ width: `${Math.min((stock.volume / 100) * 100, 100)}%` }}
+                                              style={{
+                                                width: `${Math.min(
+                                                  (stock.volume / 100) * 100,
+                                                  100,
+                                                )}%`,
+                                              }}
                                             />
                                           </div>
                                           <span className="text-xs font-medium">
