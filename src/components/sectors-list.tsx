@@ -1,7 +1,13 @@
 "use client";
 
 import * as React from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { MarketDataService, formatPercent } from "@/lib/data";
 import type { SectorPerformance } from "@/lib/data";
 
@@ -32,11 +38,23 @@ export function SectorsList({ onSelectSector }: SectorsListProps) {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Market Sectors</CardTitle>
-        <CardDescription>
-          Performance of major market sectors
-        </CardDescription>
+      <CardHeader className="border-b bg-muted/20 pb-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle>Market Sectors</CardTitle>
+            <CardDescription>Performance of major market sectors</CardDescription>
+          </div>
+          <div className="flex items-center gap-2 text-sm">
+            <span className="flex items-center gap-1">
+              <span className="h-3 w-3 rounded-full bg-green-500"></span>
+              <span className="text-xs">Bullish</span>
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="h-3 w-3 rounded-full bg-red-500"></span>
+              <span className="text-xs">Bearish</span>
+            </span>
+          </div>
+        </div>
       </CardHeader>
       <CardContent>
         {isLoading ? (
@@ -45,16 +63,18 @@ export function SectorsList({ onSelectSector }: SectorsListProps) {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {sectors.map((sector) => (
-              <Card 
-                key={sector.sector} 
-                className="cursor-pointer hover:shadow-md transition-shadow"
+            {sectors.map(sector => (
+              <Card
+                key={sector.sector}
+                className={`cursor-pointer hover:shadow-md transition-shadow border-l-4 ${
+                  sector.change > 0 ? "border-l-green-500" : "border-l-red-500"
+                }`}
                 onClick={() => onSelectSector(sector.sector)}
               >
                 <CardHeader className="pb-2">
                   <div className="flex justify-between items-center">
                     <CardTitle className="text-lg">{sector.sector}</CardTitle>
-                    <span 
+                    <span
                       className={`text-sm font-medium ${
                         sector.change > 0 ? "text-green-500" : "text-red-500"
                       }`}
@@ -64,9 +84,14 @@ export function SectorsList({ onSelectSector }: SectorsListProps) {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-muted-foreground">
-                    Click to view stocks in this sector
-                  </p>
+                  <div className="flex justify-between items-center">
+                    <p className="text-sm text-muted-foreground">
+                      Click to analyze stocks
+                    </p>
+                    <span className="text-xs bg-muted px-2 py-1 rounded-full">
+                      {sector.change > 0 ? "Bullish" : "Bearish"}
+                    </span>
+                  </div>
                 </CardContent>
               </Card>
             ))}

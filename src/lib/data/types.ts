@@ -39,6 +39,43 @@ export interface StockHistoricalData {
 export interface SectorPerformance {
   sector: string;
   change: number;
+  divYield?: number;
+  volume?: number;
+  industries?: string[];
+  stockCount?: number;
+  performance?: {
+    week1: number;
+    month1: number;
+    month3: number;
+    month6: number;
+    ytd: number;
+    year1: number;
+    year5: number;
+    year10: number;
+    allTime: number;
+  };
+  analysis?: {
+    rsi: number;
+    macd: {
+      value: number;
+      signal: number;
+      histogram: number;
+    };
+    sma: {
+      sma20: number;
+      sma50: number;
+      sma200: number;
+    };
+    ema: {
+      ema12: number;
+      ema26: number;
+    };
+    bb: {
+      upper: number;
+      middle: number;
+      lower: number;
+    };
+  };
 }
 
 export interface ChartDataItem {

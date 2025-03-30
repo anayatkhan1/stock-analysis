@@ -8,12 +8,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SectorsList } from "@/components/sectors-list";
 import { SectorAnalysisSheet } from "@/components/sector-analysis-sheet";
 import { SectorStocksPage } from "./sector-stocks-page";
-import { MarketDataService } from "@/lib/data";
-import type { TechnicalIndicator } from "@/lib/data";
+import type { StockData } from "@/lib/data";
 
 interface TechnicalAnalysisProps {
   showHeader?: boolean;
@@ -30,34 +28,22 @@ export function TechnicalAnalysis({
   const [viewingSectorId, setViewingSectorId] = React.useState<string | null>(
     null,
   );
-  const [indicators, setIndicators] = React.useState<TechnicalIndicator[]>([]);
-  const [isLoading, setIsLoading] = React.useState(true);
-
-  // Fetch technical indicators
-  React.useEffect(() => {
-    async function fetchData() {
-      setIsLoading(true);
-      try {
-        const indicatorsData = await MarketDataService.getTechnicalIndicators();
-        setIndicators(indicatorsData);
-      } catch (error) {
-        console.error("Failed to fetch technical indicators:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    fetchData();
-  }, []);
+  const [analyzedStocksData, setAnalyzedStocksData] = React.useState<StockData[]>([]);
 
   const handleSelectSector = (sectorId: string) => {
     setSelectedSectorId(sectorId);
     setSheetOpen(true);
   };
 
-  const handleViewAllStocks = (sectorId: string) => {
+  const handleViewAllStocks = (sectorId: string, analyzedStocks?: StockData[]) => {
     setViewingSectorId(sectorId);
     setViewingSectorStocks(true);
+    // Store analyzed stocks if provided
+    if (analyzedStocks) {
+      setAnalyzedStocksData(analyzedStocks);
+    } else {
+      setAnalyzedStocksData([]);
+    }
   };
 
   const handleBackToSectors = () => {
@@ -65,68 +51,32 @@ export function TechnicalAnalysis({
     setViewingSectorId(null);
   };
 
-  // Group indicators by type
-  const indicatorsByType = React.useMemo(() => {
-    const grouped: Record<string, TechnicalIndicator[]> = {
-      momentum: [],
-      trend: [],
-      volatility: [],
-      volume: [],
-    };
-
-    indicators.forEach(indicator => {
-      if (grouped[indicator.type]) {
-        grouped[indicator.type].push(indicator);
-      }
-    });
-
-    return grouped;
-  }, [indicators]);
-
   return (
     <div className="space-y-6">
       {showHeader && (
-        <Card>
+        <Card className="bg-gradient-to-r from-muted/50 to-background border">
           <CardHeader>
-            <CardTitle>Technical Analysis Tools</CardTitle>
+            <CardTitle>Market Sector Analysis</CardTitle>
             <CardDescription>
-              Our stock scanner uses advanced technical indicators to identify
-              trading opportunities
+              Discover high-potential stocks using technical analysis
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <Tabs defaultValue="momentum" className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
-                {Object.keys(indicatorsByType).map(type => (
-                  <TabsTrigger key={type} value={type} className="capitalize">
-                    {type} Indicators
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-
-              {Object.entries(indicatorsByType).map(
-                ([type, typeIndicators]) => (
-                  <TabsContent key={type} value={type} className="mt-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {typeIndicators.map(indicator => (
-                        <Card key={indicator.id}>
-                          <CardHeader className="pb-2">
-                            <CardTitle className="text-lg">
-                              {indicator.name}
-                            </CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            <p className="text-sm text-muted-foreground">
-                              {indicator.description}
-                            </p>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  </TabsContent>
-                ),
-              )}
-            </Tabs>
+          <CardContent className="grid gap-4">
+            <div className="flex items-start gap-3 bg-muted/30 p-3 rounded-md">
+              <div className="bg-primary/10 p-2 rounded-full mt-1">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
+                  <path d="M12 20v-6M6 20V10M18 20V4"></path>
+                </svg>
+              </div>
+              <div>
+                <h3 className="font-medium text-sm">How it works</h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                  1. Select a sector from the list below<br />
+                  2. Apply technical indicators to analyze stocks<br />
+                  3. View top-performing stocks based on your analysis
+                </p>
+              </div>
+            </div>
           </CardContent>
         </Card>
       )}
@@ -135,6 +85,7 @@ export function TechnicalAnalysis({
         <SectorStocksPage
           sectorId={viewingSectorId}
           onBack={handleBackToSectors}
+          analyzedStocks={analyzedStocksData.length > 0 ? analyzedStocksData : undefined}
         />
       ) : (
         <SectorsList onSelectSector={handleSelectSector} />
