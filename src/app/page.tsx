@@ -1,4 +1,5 @@
 import ContentSection from "@/components/content-7";
+import FAQs from "@/components/faqs";
 import FeaturesSection from "@/components/features-9";
 import HeroSection from "@/components/hero-section";
 import Pricing from "@/components/pricing";
@@ -14,6 +15,7 @@ const LandingPage = () => {
       <StatsSection />
       <Testimonials />
       <Pricing />
+      <FAQs />
     </div>
   );
 };
