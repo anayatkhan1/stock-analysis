@@ -36,9 +36,9 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <SharedLayout>
-            <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+            <main className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
               {children}
-            </div>
+            </main>
           </SharedLayout>
         </ThemeProvider>
       </body>

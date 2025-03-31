@@ -64,7 +64,7 @@ export const HeroHeader = () => {
                     <Link
                       href={item.href}
                       className="text-muted-foreground hover:text-accent-foreground block duration-150"
-                      onClick={(e) => {
+                      onClick={e => {
                         e.preventDefault();
                         setMenuState(false);
                         smoothScrollTo(item.href);
@@ -85,7 +85,7 @@ export const HeroHeader = () => {
                       <Link
                         href={item.href}
                         className="text-muted-foreground hover:text-accent-foreground block duration-150"
-                        onClick={(e) => {
+                        onClick={e => {
                           e.preventDefault();
                           setMenuState(false);
                           smoothScrollTo(item.href);
@@ -127,7 +127,9 @@ export const HeroHeader = () => {
                 <Button
                   asChild
                   size="sm"
-                  className={cn(isScrolled ? "lg:inline-flex" : "hidden")}
+                  className={cn(
+                    isScrolled ? "lg:inline-flex hidden" : "hidden",
+                  )}
                 >
                   <Link href="/app">
                     <span>Dashboard</span>

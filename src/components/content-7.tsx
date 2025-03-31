@@ -32,55 +32,58 @@ const chartData = [
 
 export default function ContentSection() {
   return (
-    <section className="py-16 md:py-32">
-      <div className="mx-auto max-w-5xl space-y-8 px-6 md:space-y-16">
-        <h2 className="relative z-10 max-w-xl text-4xl font-medium lg:text-5xl">
+    <section className="py-12 md:py-24 lg:py-32">
+      <div className="mx-auto max-w-5xl space-y-6 px-4 sm:px-6 md:space-y-16">
+        <h2 className="relative z-10 max-w-xl text-3xl font-medium md:text-4xl lg:text-5xl">
           Advanced stock analysis for informed decisions.
         </h2>
-        <div className="grid gap-6 sm:grid-cols-2 md:gap-12 lg:gap-24">
+        <div className="grid gap-8 md:grid-cols-2 md:gap-12 lg:gap-24">
           <div className="relative space-y-4">
-            <p className="text-muted-foreground">
+            <p className="text-muted-foreground text-sm sm:text-base">
               Our platform is more than just stock charts.{" "}
               <span className="text-accent-foreground font-bold">
                 It provides a comprehensive ecosystem
               </span>{" "}
               — from real-time market data to advanced technical analysis.
             </p>
-            <p className="text-muted-foreground">
+            <p className="text-muted-foreground text-sm sm:text-base">
               Access global market coverage, expert insights, and powerful
               analytical tools to help investors make data-driven decisions in
               today's dynamic financial markets.
             </p>
 
-            <div className="grid grid-cols-2 gap-3 pt-6 sm:gap-4">
-              <div className="space-y-3">
+            <div className="grid grid-cols-1 gap-4 pt-4 sm:grid-cols-2 sm:gap-4 sm:pt-6">
+              <div className="space-y-2 sm:space-y-3">
                 <div className="flex items-center gap-2">
                   <TrendingUp className="size-4" />
                   <h3 className="text-sm font-medium">Real-time</h3>
                 </div>
-                <p className="text-muted-foreground text-sm">
+                <p className="text-muted-foreground text-xs sm:text-sm">
                   Instant market updates and stock tracking across global
                   exchanges.
                 </p>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-2 sm:space-y-3">
                 <div className="flex items-center gap-2">
                   <ChartLine className="size-4" />
                   <h3 className="text-sm font-medium">Analytical</h3>
                 </div>
-                <p className="text-muted-foreground text-sm">
+                <p className="text-muted-foreground text-xs sm:text-sm">
                   Powerful technical indicators and pattern recognition tools.
                 </p>
               </div>
             </div>
           </div>
-          <div className="relative mt-6 sm:mt-0">
-            <div className="bg-linear-to-b aspect-67/34 relative rounded-2xl from-zinc-300 to-transparent p-px dark:from-zinc-700">
+          <div className="relative mt-8 md:mt-0">
+            <div className="bg-linear-to-b aspect-auto sm:aspect-67/34 relative rounded-2xl from-zinc-300 to-transparent p-px dark:from-zinc-700">
               <ChartContainer
-                className="h-[250px] sm:h-[300px] w-full"
+                className="h-[200px] w-full sm:h-[250px] md:h-[300px]"
                 config={chartConfig}
               >
-                <AreaChart data={chartData}>
+                <AreaChart
+                  data={chartData}
+                  margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+                >
                   <defs>
                     <linearGradient id="fillPrice" x1="0" y1="0" x2="0" y2="1">
                       <stop
@@ -101,7 +104,8 @@ export default function ContentSection() {
                     tickLine={false}
                     axisLine={false}
                     tickMargin={8}
-                    minTickGap={32}
+                    minTickGap={10}
+                    tick={{ fontSize: "0.75rem" }}
                     tickFormatter={value => {
                       const date = new Date(value);
                       return date.toLocaleDateString("en-US", {
@@ -115,6 +119,8 @@ export default function ContentSection() {
                     tickLine={false}
                     axisLine={false}
                     tickMargin={8}
+                    tick={{ fontSize: "0.75rem" }}
+                    width={40}
                   />
                   <ChartTooltip
                     cursor={false}

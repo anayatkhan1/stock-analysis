@@ -30,8 +30,8 @@ export default function FeaturesSection() {
           <div aria-hidden className="relative">
             <div className="absolute inset-0 z-10 m-auto size-fit">
               <div className="rounded-(--radius) bg-background z-1 dark:bg-muted relative flex size-fit w-fit items-center gap-2 border px-3 py-1 text-xs font-medium shadow-md shadow-zinc-950/5">
-                <span className="text-lg">📈</span> Latest update: NYSE market
-                surge
+                <span className="text-lg">🇨🇩</span> Latest update: NYSE market
+                Surge
               </div>
               <div className="rounded-(--radius) bg-background absolute inset-2 -bottom-2 mx-auto border px-3 py-4 text-xs font-medium shadow-md shadow-zinc-950/5 dark:bg-zinc-900"></div>
             </div>
@@ -87,7 +87,7 @@ export default function FeaturesSection() {
           </p>
         </div>
         <div className="relative col-span-full">
-          <div className="z-10 max-w-lg px-6 pr-12 pt-6 md:absolute md:px-12 md:pt-12">
+          <div className="absolute z-10 max-w-lg px-6 pr-12 pt-6 md:px-12 md:pt-12">
             <span className="text-muted-foreground flex items-center gap-2">
               <Activity className="size-4" />
               Market Performance
@@ -157,10 +157,7 @@ const chartData = [
 
 const MonitoringChart = () => {
   return (
-    <ChartContainer
-      className="h-80 w-full mt-16 md:mt-0 md:h-96"
-      config={chartConfig}
-    >
+    <ChartContainer className="h-120 aspect-auto md:h-96" config={chartConfig}>
       <AreaChart
         accessibilityLayer
         data={chartData}
