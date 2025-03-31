@@ -10,7 +10,7 @@ import Testimonials from "@/components/testimonials";
 
 const LandingPage = () => {
   return (
-    <div className="h-screen">
+    <div className="min-h-screen w-full overflow-x-hidden">
       <HeroSection />
       <div id="features">
         <FeaturesSection />

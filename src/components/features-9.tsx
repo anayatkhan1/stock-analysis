@@ -87,7 +87,7 @@ export default function FeaturesSection() {
           </p>
         </div>
         <div className="relative col-span-full">
-          <div className="absolute z-10 max-w-lg px-6 pr-12 pt-6 md:px-12 md:pt-12">
+          <div className="z-10 max-w-lg px-6 pr-12 pt-6 md:absolute md:px-12 md:pt-12">
             <span className="text-muted-foreground flex items-center gap-2">
               <Activity className="size-4" />
               Market Performance
@@ -157,7 +157,10 @@ const chartData = [
 
 const MonitoringChart = () => {
   return (
-    <ChartContainer className="h-120 aspect-auto md:h-96" config={chartConfig}>
+    <ChartContainer
+      className="h-80 w-full mt-16 md:mt-0 md:h-96"
+      config={chartConfig}
+    >
       <AreaChart
         accessibilityLayer
         data={chartData}

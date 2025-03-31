@@ -76,7 +76,10 @@ export default function ContentSection() {
           </div>
           <div className="relative mt-6 sm:mt-0">
             <div className="bg-linear-to-b aspect-67/34 relative rounded-2xl from-zinc-300 to-transparent p-px dark:from-zinc-700">
-              <ChartContainer className="h-[300px] w-full" config={chartConfig}>
+              <ChartContainer
+                className="h-[250px] sm:h-[300px] w-full"
+                config={chartConfig}
+              >
                 <AreaChart data={chartData}>
                   <defs>
                     <linearGradient id="fillPrice" x1="0" y1="0" x2="0" y2="1">
