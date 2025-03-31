@@ -1,10 +1,6 @@
 # Stock Analysis Dashboard
 
-<<<<<<< HEAD
-![Stock Analysis Dashboard](https://via.placeholder.com/800x400?text=Stock+Analysis+Dashboard)
-=======
 <img width="1547" alt="image" src="https://github.com/user-attachments/assets/7916cb41-3b10-42f4-b4f7-7e3f890495e0" />
->>>>>>> main
 
 A comprehensive stock market analysis application built with Next.js and TypeScript. This dashboard provides real-time market data, interactive charts, sector analysis, and technical indicators to help investors make informed decisions.
 
