@@ -6,6 +6,10 @@ import {
   IconChartLine,
   IconTrendingDown,
   IconTrendingUp,
+  IconWorld,
+  IconCoin,
+  IconCurrencyDollar,
+  IconBuildingBank,
   IconInfoCircle,
   IconArrowUpRight,
   IconArrowDownRight,
@@ -30,112 +34,101 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import {
-  ChartDataItem,
-  MarketDataService,
-  StockData,
-  formatMarketCap,
-  formatNumber,
-  formatPercent,
-} from "@/lib/data";
+import { ChartDataItem, MarketDataService, formatPercent } from "@/lib/data";
+import { MarketItem } from "@/lib/data/types";
 
-interface StockDetailSheetProps {
-  stock: StockData | null;
+interface MarketItemDetailSheetProps {
+  item: MarketItem | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
 const chartConfig = {
   price: {
-    label: "Price",
+    label: "Value",
     color: "hsl(var(--chart-1))",
-  },
-  volume: {
-    label: "Volume (M)",
-    color: "hsl(var(--chart-2))",
   },
 } satisfies ChartConfig;
 
-export function StockDetailSheet({
-  stock,
+export function MarketItemDetailSheet({
+  item,
   open,
   onOpenChange,
-}: StockDetailSheetProps) {
+}: MarketItemDetailSheetProps) {
   const [timeRange, setTimeRange] = React.useState("3m");
-  const [stockData, setStockData] = React.useState<ChartDataItem[]>([]);
+  const [chartData, setChartData] = React.useState<ChartDataItem[]>([]);
   const [filteredData, setFilteredData] = React.useState<ChartDataItem[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
 
-  // Only calculate isPositive if stock exists
-  const isPositive = stock ? stock.changePercent > 0 : false;
-
-  // Fetch historical data for the stock
+  // Fetch historical data for the market item
   React.useEffect(() => {
     async function fetchData() {
-      if (!stock) return;
+      if (!item) return;
 
       setIsLoading(true);
       try {
-        const historicalData = await MarketDataService.getStockHistoricalData(
-          stock,
+        const historicalData = await MarketDataService.getIndexHistoricalData(
+          item.name,
         );
-        const formattedData = MarketDataService.formatChartData(
-          historicalData,
-        ).map(item => ({
-          ...item,
-          volume: item.volume * (stock.volume / 10), // Scale volume based on stock's volume
-        }));
-        setStockData(formattedData);
+        const formattedData = MarketDataService.formatChartData(historicalData);
+        setChartData(formattedData);
       } catch (error) {
-        console.error("Failed to fetch stock historical data:", error);
+        console.error("Failed to fetch market item historical data:", error);
       } finally {
         setIsLoading(false);
       }
     }
 
-    fetchData();
-  }, [stock]);
+    if (open && item) {
+      fetchData();
+    }
+  }, [item, open]);
 
   // Filter data by time range
   React.useEffect(() => {
     const filtered = MarketDataService.filterDataByTimeRange(
-      stockData,
+      chartData,
       timeRange as "1m" | "3m" | "6m" | "1y" | "5y",
     );
     setFilteredData(filtered);
-  }, [timeRange, stockData]);
+  }, [timeRange, chartData]);
 
-  // Calculate chart change only if we have data
-  const chartChange =
-    filteredData.length > 0
-      ? MarketDataService.calculateChange(filteredData)
-      : { value: 0, percent: "0.00" };
+  if (!item) return null;
+
+  const isPositive1D = item.change1D > 0;
+  const chartChange = MarketDataService.calculateChange(filteredData);
   const chartIsPositive = parseFloat(chartChange.percent as string) >= 0;
 
-  // If stock is null, render nothing or a placeholder
-  if (!stock) {
-    return (
-      <Sheet open={open} onOpenChange={onOpenChange}>
-        <SheetContent className="w-full sm:max-w-md md:max-w-lg lg:max-w-xl overflow-y-auto p-5">
-          <SheetHeader className="px-1 pb-4">
-            <SheetTitle>No stock selected</SheetTitle>
-            <SheetDescription>
-              Please select a stock to view details
-            </SheetDescription>
-          </SheetHeader>
-        </SheetContent>
-      </Sheet>
-    );
-  }
+  // Get icon based on market item type
+  const getTypeIcon = () => {
+    switch (item.type) {
+      case "index":
+        return <IconWorld className="size-5" />;
+      case "commodity":
+        return <IconCoin className="size-5" />;
+      case "currency":
+        return <IconCurrencyDollar className="size-5" />;
+      case "bond":
+        return <IconBuildingBank className="size-5" />;
+      default:
+        return <IconChartLine className="size-5" />;
+    }
+  };
 
-  // Simulate weekly, monthly, and quarterly changes based on daily change
-  // In a real app, these would come from the API
-  const simulatedChanges = {
-    week1: stock.changePercent * (Math.random() * 2 + 3), // 3-5x daily change
-    month1: stock.changePercent * (Math.random() * 3 + 5), // 5-8x daily change
-    month3: stock.changePercent * (Math.random() * 5 + 8), // 8-13x daily change
-    month6: stock.changePercent * (Math.random() * 8 + 10), // 10-18x daily change
-    year1: stock.changePercent * (Math.random() * 10 + 15), // 15-25x daily change
+  // Get type label
+  const getTypeLabel = () => {
+    switch (item.type) {
+      case "index":
+        return "Market Index";
+      case "commodity":
+        return "Commodity";
+      case "currency":
+        return "Currency";
+      case "bond":
+        return "Bond";
+      default:
+        return "Asset";
+    }
   };
 
   return (
@@ -145,22 +138,25 @@ export function StockDetailSheet({
           <div className="flex items-center justify-between">
             <div>
               <SheetTitle className="font-bold text-2xl">
-                {stock.symbol}
+                {item.name}
               </SheetTitle>
-              <SheetDescription>{stock.name}</SheetDescription>
+              <SheetDescription className="flex items-center gap-1">
+                {getTypeIcon()} {getTypeLabel()}
+                {item.country && ` • ${item.country}`}
+              </SheetDescription>
             </div>
             <Badge
               variant="outline"
               className={`flex items-center gap-1 ${
-                isPositive ? "text-green-500" : "text-red-500"
+                isPositive1D ? "text-green-500" : "text-red-500"
               }`}
             >
-              {isPositive ? (
+              {isPositive1D ? (
                 <IconTrendingUp className="size-4" />
               ) : (
                 <IconTrendingDown className="size-4" />
               )}
-              {formatPercent(stock.changePercent)}
+              {formatPercent(item.change1D)}
             </Badge>
           </div>
         </SheetHeader>
@@ -175,23 +171,25 @@ export function StockDetailSheet({
           <TabsContent value="overview" className="mt-4 space-y-6 px-1">
             <div className="flex items-center justify-between p-4 rounded-md border bg-muted/30">
               <div>
-                <p className="text-muted-foreground text-sm">Current Price</p>
-                <p className="font-medium text-2xl">₹{stock.price.toLocaleString()}</p>
+                <p className="text-muted-foreground text-sm">Current Value</p>
+                <p className="font-medium text-2xl">
+                  {item.value.toLocaleString()}
+                </p>
               </div>
               <div className="text-right">
                 <p className="text-muted-foreground text-sm">1 Day Change</p>
                 <div className="flex items-center gap-1 justify-end">
-                  {isPositive ? (
+                  {isPositive1D ? (
                     <IconArrowUpRight className="size-4 text-green-500" />
                   ) : (
                     <IconArrowDownRight className="size-4 text-red-500" />
                   )}
                   <p
                     className={`font-medium text-lg ${
-                      isPositive ? "text-green-500" : "text-red-500"
+                      isPositive1D ? "text-green-500" : "text-red-500"
                     }`}
                   >
-                    {formatPercent(stock.changePercent)}
+                    {formatPercent(item.change1D)}
                   </p>
                 </div>
               </div>
@@ -209,17 +207,17 @@ export function StockDetailSheet({
                     <span className="text-sm font-medium">1 Week</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    {simulatedChanges.week1 > 0 ? (
+                    {item.change1W > 0 ? (
                       <IconArrowUpRight className="size-4 text-green-500" />
                     ) : (
                       <IconArrowDownRight className="size-4 text-red-500" />
                     )}
                     <span
                       className={`font-medium ${
-                        simulatedChanges.week1 > 0 ? "text-green-500" : "text-red-500"
+                        item.change1W > 0 ? "text-green-500" : "text-red-500"
                       }`}
                     >
-                      {formatPercent(simulatedChanges.week1)}
+                      {formatPercent(item.change1W)}
                     </span>
                   </div>
                 </div>
@@ -229,17 +227,17 @@ export function StockDetailSheet({
                     <span className="text-sm font-medium">1 Month</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    {simulatedChanges.month1 > 0 ? (
+                    {item.change1M > 0 ? (
                       <IconArrowUpRight className="size-4 text-green-500" />
                     ) : (
                       <IconArrowDownRight className="size-4 text-red-500" />
                     )}
                     <span
                       className={`font-medium ${
-                        simulatedChanges.month1 > 0 ? "text-green-500" : "text-red-500"
+                        item.change1M > 0 ? "text-green-500" : "text-red-500"
                       }`}
                     >
-                      {formatPercent(simulatedChanges.month1)}
+                      {formatPercent(item.change1M)}
                     </span>
                   </div>
                 </div>
@@ -249,17 +247,17 @@ export function StockDetailSheet({
                     <span className="text-sm font-medium">3 Months</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    {simulatedChanges.month3 > 0 ? (
+                    {item.change3M > 0 ? (
                       <IconArrowUpRight className="size-4 text-green-500" />
                     ) : (
                       <IconArrowDownRight className="size-4 text-red-500" />
                     )}
                     <span
                       className={`font-medium ${
-                        simulatedChanges.month3 > 0 ? "text-green-500" : "text-red-500"
+                        item.change3M > 0 ? "text-green-500" : "text-red-500"
                       }`}
                     >
-                      {formatPercent(simulatedChanges.month3)}
+                      {formatPercent(item.change3M)}
                     </span>
                   </div>
                 </div>
@@ -269,17 +267,17 @@ export function StockDetailSheet({
                     <span className="text-sm font-medium">6 Months</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    {simulatedChanges.month6 > 0 ? (
+                    {item.change6M > 0 ? (
                       <IconArrowUpRight className="size-4 text-green-500" />
                     ) : (
                       <IconArrowDownRight className="size-4 text-red-500" />
                     )}
                     <span
                       className={`font-medium ${
-                        simulatedChanges.month6 > 0 ? "text-green-500" : "text-red-500"
+                        item.change6M > 0 ? "text-green-500" : "text-red-500"
                       }`}
                     >
-                      {formatPercent(simulatedChanges.month6)}
+                      {formatPercent(item.change6M)}
                     </span>
                   </div>
                 </div>
@@ -289,51 +287,33 @@ export function StockDetailSheet({
                     <span className="text-sm font-medium">1 Year</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    {simulatedChanges.year1 > 0 ? (
+                    {item.change1Y > 0 ? (
                       <IconArrowUpRight className="size-4 text-green-500" />
                     ) : (
                       <IconArrowDownRight className="size-4 text-red-500" />
                     )}
                     <span
                       className={`font-medium ${
-                        simulatedChanges.year1 > 0 ? "text-green-500" : "text-red-500"
+                        item.change1Y > 0 ? "text-green-500" : "text-red-500"
                       }`}
                     >
-                      {formatPercent(simulatedChanges.year1)}
+                      {formatPercent(item.change1Y)}
                     </span>
                   </div>
                 </div>
               </div>
-            </div>
 
-            <div className="space-y-3">
-              <h3 className="font-semibold">Company Information</h3>
-              <div className="rounded-md border p-5">
-                <div className="grid grid-cols-2 gap-6">
-                  <div className="space-y-1">
-                    <p className="text-muted-foreground text-sm">Market Cap</p>
-                    <p className="font-medium">{formatMarketCap(stock.marketCap)}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-muted-foreground text-sm">P/E Ratio</p>
-                    <p className="font-medium">{stock.pe.toFixed(1)}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-muted-foreground text-sm">Volume</p>
-                    <p className="font-medium">{formatNumber(stock.volume)}M</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-muted-foreground text-sm">Sector</p>
-                    <p className="font-medium">{stock.sector}</p>
-                  </div>
+              <div className="flex items-center justify-between mt-2 text-sm text-muted-foreground">
+                <div className="flex items-center gap-1">
+                  <IconCalendar className="size-4" />
+                  <span>Last Updated: {new Date().toLocaleDateString()}</span>
                 </div>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between mt-2 text-sm text-muted-foreground">
-              <div className="flex items-center gap-1">
-                <IconCalendar className="size-4" />
-                <span>Last Updated: {new Date(stock.lastUpdated).toLocaleDateString()}</span>
+                {item.country && (
+                  <div className="flex items-center gap-1">
+                    <IconWorld className="size-4" />
+                    <span>{item.country}</span>
+                  </div>
+                )}
               </div>
             </div>
           </TabsContent>
@@ -399,7 +379,7 @@ export function StockDetailSheet({
                   <AreaChart data={filteredData}>
                     <defs>
                       <linearGradient
-                        id="fillStockPrice"
+                        id="fillMarketItemPrice"
                         x1="0"
                         y1="0"
                         x2="0"
@@ -470,7 +450,7 @@ export function StockDetailSheet({
                     <Area
                       dataKey="price"
                       type="monotone"
-                      fill="url(#fillStockPrice)"
+                      fill="url(#fillMarketItemPrice)"
                       stroke={
                         chartIsPositive
                           ? "rgba(34, 197, 94, 1)"
@@ -499,15 +479,16 @@ export function StockDetailSheet({
                     Trend Strength
                   </p>
                   <div className="flex items-center gap-2">
-                    {Math.abs(stock.changePercent) > 3 ? (
+                    {Math.abs(parseFloat(chartChange.percent as string)) > 5 ? (
                       <Badge
-                        variant={isPositive ? "default" : "destructive"}
+                        variant={chartIsPositive ? "default" : "destructive"}
                       >
                         Strong
                       </Badge>
-                    ) : Math.abs(stock.changePercent) > 1 ? (
+                    ) : Math.abs(parseFloat(chartChange.percent as string)) >
+                      2 ? (
                       <Badge
-                        variant={isPositive ? "default" : "destructive"}
+                        variant={chartIsPositive ? "default" : "destructive"}
                       >
                         Moderate
                       </Badge>
@@ -519,9 +500,9 @@ export function StockDetailSheet({
                 <div className="space-y-1">
                   <p className="text-muted-foreground text-sm">Volatility</p>
                   <div className="flex items-center gap-2">
-                    {stock.volume > 10 ? (
+                    {item.type === "commodity" || item.type === "currency" ? (
                       <Badge variant="outline">High</Badge>
-                    ) : stock.volume < 5 ? (
+                    ) : item.type === "bond" ? (
                       <Badge variant="outline">Low</Badge>
                     ) : (
                       <Badge variant="outline">Medium</Badge>
@@ -539,19 +520,19 @@ export function StockDetailSheet({
                     <div className="flex items-center gap-2">
                       <IconArrowUpRight
                         className={`size-4 ${
-                          stock.changePercent > 0 ? "text-green-500" : "text-red-500"
+                          item.change1D > 0 ? "text-green-500" : "text-red-500"
                         }`}
                       />
                       <span>Short-term Momentum</span>
                     </div>
                     <Badge
                       variant={
-                        stock.changePercent > 0 && simulatedChanges.week1 > 0
+                        item.change1D > 0 && item.change1W > 0
                           ? "default"
                           : "destructive"
                       }
                     >
-                      {stock.changePercent > 0 && simulatedChanges.week1 > 0
+                      {item.change1D > 0 && item.change1W > 0
                         ? "Bullish"
                         : "Bearish"}
                     </Badge>
@@ -560,19 +541,19 @@ export function StockDetailSheet({
                     <div className="flex items-center gap-2">
                       <IconChartLine
                         className={`size-4 ${
-                          simulatedChanges.month1 > 0 ? "text-green-500" : "text-red-500"
+                          item.change1M > 0 ? "text-green-500" : "text-red-500"
                         }`}
                       />
                       <span>Medium-term Trend</span>
                     </div>
                     <Badge
                       variant={
-                        simulatedChanges.month1 > 0 && simulatedChanges.month3 > 0
+                        item.change1M > 0 && item.change3M > 0
                           ? "default"
                           : "destructive"
                       }
                     >
-                      {simulatedChanges.month1 > 0 && simulatedChanges.month3 > 0
+                      {item.change1M > 0 && item.change3M > 0
                         ? "Bullish"
                         : "Bearish"}
                     </Badge>
@@ -581,19 +562,19 @@ export function StockDetailSheet({
                     <div className="flex items-center gap-2">
                       <IconChartCandle
                         className={`size-4 ${
-                          simulatedChanges.month6 > 0 ? "text-green-500" : "text-red-500"
+                          item.change6M > 0 ? "text-green-500" : "text-red-500"
                         }`}
                       />
                       <span>Long-term Outlook</span>
                     </div>
                     <Badge
                       variant={
-                        simulatedChanges.month6 > 0 && simulatedChanges.year1 > 0
+                        item.change6M > 0 && item.change1Y > 0
                           ? "default"
                           : "destructive"
                       }
                     >
-                      {simulatedChanges.month6 > 0 && simulatedChanges.year1 > 0
+                      {item.change6M > 0 && item.change1Y > 0
                         ? "Bullish"
                         : "Bearish"}
                     </Badge>
@@ -605,22 +586,29 @@ export function StockDetailSheet({
             <div className="rounded-md border p-5">
               <div className="flex items-center gap-2 mb-4">
                 <IconInfoCircle className="size-5 text-muted-foreground" />
-                <h3 className="font-medium">Stock Insights</h3>
+                <h3 className="font-medium">Market Insights</h3>
               </div>
               <p className="text-muted-foreground text-sm mb-4">
-                {stock.name} is a {stock.sector} company listed on the Indian stock market.
-                With a market cap of {formatMarketCap(stock.marketCap)} and P/E ratio of {stock.pe.toFixed(1)},
-                it {stock.pe < 15 ? "may be considered undervalued compared to industry peers" : 
-                   stock.pe > 30 ? "trades at a premium compared to industry peers" : 
-                   "is trading at a valuation in line with industry peers"}.
+                {item.type === "index" &&
+                  `${
+                    item.name
+                  } is a stock market index that measures the performance of ${
+                    item.country || "global"
+                  } stocks.`}
+                {item.type === "commodity" &&
+                  `${item.name} is a commodity traded globally and influenced by supply, demand, and geopolitical factors.`}
+                {item.type === "bond" &&
+                  `${item.name} represents debt securities with fixed interest payments and principal repayment at maturity.`}
+                {item.type === "currency" &&
+                  `${item.name} is a currency pair showing the exchange rate between two national currencies.`}
               </p>
               <p className="text-sm">
                 {chartIsPositive
                   ? `The ${timeRange} trend shows positive momentum with a ${chartChange.percent}% increase.`
                   : `The ${timeRange} trend shows negative pressure with a ${chartChange.percent}% decrease.`}{" "}
-                {simulatedChanges.week1 > 0 && simulatedChanges.month1 > 0 && simulatedChanges.month3 > 0
+                {item.change1D > 0 && item.change1W > 0 && item.change1M > 0
                   ? "Short, medium, and long-term indicators all suggest bullish sentiment."
-                  : simulatedChanges.week1 < 0 && simulatedChanges.month1 < 0 && simulatedChanges.month3 < 0
+                  : item.change1D < 0 && item.change1W < 0 && item.change1M < 0
                   ? "Short, medium, and long-term indicators all suggest bearish sentiment."
                   : "Mixed signals across different timeframes suggest market uncertainty."}
               </p>

@@ -3,7 +3,7 @@
 import * as React from "react";
 import { ChartAreaInteractive } from "@/components/chart-area-interactive";
 import { MarketSummary } from "@/components/market-summary";
-import { StockTable } from "@/components/stock-table";
+import { IndianMarketDataTable } from "@/components/indian-market-data-table";
 import {
   Card,
   CardContent,
@@ -25,13 +25,15 @@ import {
   formatNumber,
   formatPercent,
   MarketIndex,
-  SectorPerformance
+  SectorPerformance,
 } from "@/lib/data";
 
 export default function IndianMarketsPage() {
   const [selectedIndex, setSelectedIndex] = React.useState<string>("NIFTY 50");
   const [indices, setIndices] = React.useState<MarketIndex[]>([]);
-  const [sectorPerformance, setSectorPerformance] = React.useState<SectorPerformance[]>([]);
+  const [sectorPerformance, setSectorPerformance] = React.useState<
+    SectorPerformance[]
+  >([]);
   const [isLoading, setIsLoading] = React.useState(true);
 
   // Fetch market indices data
@@ -90,7 +92,10 @@ export default function IndianMarketsPage() {
           {isLoading ? (
             <div className="grid @5xl/main:grid-cols-4 @xl/main:grid-cols-2 grid-cols-1 gap-4">
               {[1, 2, 3, 4].map(i => (
-                <Card key={i} className="h-[180px] flex items-center justify-center">
+                <Card
+                  key={i}
+                  className="h-[180px] flex items-center justify-center"
+                >
                   <p>Loading market data...</p>
                 </Card>
               ))}
@@ -104,16 +109,30 @@ export default function IndianMarketsPage() {
                   onClick={() => handleSelectIndex(index.name)}
                 >
                   <CardHeader>
-                    <CardDescription>{index.name === "NIFTY 50" || index.name === "BANK NIFTY" || index.name === "NIFTY IT" ? "NSE" : "BSE"}</CardDescription>
+                    <CardDescription>
+                      {index.name === "NIFTY 50" ||
+                      index.name === "BANK NIFTY" ||
+                      index.name === "NIFTY IT"
+                        ? "NSE"
+                        : "BSE"}
+                    </CardDescription>
                     <CardTitle className="font-semibold @[250px]/card:text-3xl text-2xl tabular-nums">
                       {formatNumber(index.value)}
                     </CardTitle>
                     <CardAction>
                       <Badge
                         variant="outline"
-                        className={index.changePercent > 0 ? "text-green-500" : "text-red-500"}
+                        className={
+                          index.changePercent > 0
+                            ? "text-green-500"
+                            : "text-red-500"
+                        }
                       >
-                        {index.changePercent > 0 ? <IconTrendingUp /> : <IconTrendingDown />}
+                        {index.changePercent > 0 ? (
+                          <IconTrendingUp />
+                        ) : (
+                          <IconTrendingDown />
+                        )}
                         {formatPercent(index.changePercent)}
                       </Badge>
                     </CardAction>
@@ -132,9 +151,7 @@ export default function IndianMarketsPage() {
                         </>
                       )}
                     </div>
-                    <div className="text-muted-foreground">
-                      {index.name}
-                    </div>
+                    <div className="text-muted-foreground">{index.name}</div>
                   </CardFooter>
                 </Card>
               ))}
@@ -167,14 +184,22 @@ export default function IndianMarketsPage() {
                         <div key={sector.sector} className="space-y-2">
                           <div className="flex items-center justify-between text-sm">
                             <div className="font-medium">{sector.sector}</div>
-                            <span className={sector.change > 0 ? "text-green-500" : "text-red-500"}>
+                            <span
+                              className={
+                                sector.change > 0
+                                  ? "text-green-500"
+                                  : "text-red-500"
+                              }
+                            >
                               {formatPercent(sector.change)}
                             </span>
                           </div>
                           <Progress
                             value={getProgressValue(sector.change)}
                             className="h-2 bg-muted"
-                            indicatorClassName={sector.change > 0 ? "bg-green-500" : "bg-red-500"}
+                            indicatorClassName={
+                              sector.change > 0 ? "bg-green-500" : "bg-red-500"
+                            }
                           />
                         </div>
                       ))}
@@ -186,7 +211,7 @@ export default function IndianMarketsPage() {
               <MarketSummary />
             </div>
 
-            <StockTable />
+            <IndianMarketDataTable />
           </div>
         </div>
       </div>

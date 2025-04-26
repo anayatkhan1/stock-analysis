@@ -6,6 +6,7 @@ import {
 	StockData,
 	StockHistoricalData,
 	TechnicalIndicator,
+	MarketItem,
 } from "./types";
 import {
 	generateHistoricalData,
@@ -18,6 +19,7 @@ import {
 	mockTopStocks,
 	mockTechnicalIndicators,
 } from "./mock-data";
+import { mockMarketItems } from "./mock-market-items";
 
 /**
  * Market Data Service
@@ -174,5 +176,25 @@ export class MarketDataService {
 		// In the future, replace with API call
 		// return fetch('/api/technical-indicators').then(res => res.json());
 		return Promise.resolve(mockTechnicalIndicators);
+	}
+
+	/**
+	 * Get market items for the comprehensive market data table
+	 * Includes indices, commodities, bonds, and currencies
+	 */
+	static async getMarketItems(): Promise<MarketItem[]> {
+		// In the future, replace with API call
+		// return fetch('/api/market-items').then(res => res.json());
+		return Promise.resolve(mockMarketItems);
+	}
+
+	/**
+	 * Get market items filtered by type
+	 */
+	static async getMarketItemsByType(type: 'index' | 'commodity' | 'bond' | 'currency'): Promise<MarketItem[]> {
+		// In the future, replace with API call
+		// return fetch(`/api/market-items/${type}`).then(res => res.json());
+		const items = await this.getMarketItems();
+		return items.filter(item => item.type === type);
 	}
 }

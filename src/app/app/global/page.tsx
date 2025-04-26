@@ -2,12 +2,9 @@
 
 import * as React from "react";
 import { ChartAreaInteractive } from "@/components/chart-area-interactive";
-import { MarketSummary } from "@/components/market-summary";
 import { SectionCards } from "@/components/section-cards";
-import { StockTable } from "@/components/stock-table";
-import { GlobalMarketHeatmap } from "@/components/global-market-heatmap";
+import { MarketDataTable } from "@/components/market-data-table";
 import { Card, CardContent } from "@/components/ui/card";
-
 export default function GlobalMarketsPage() {
   const [selectedIndex, setSelectedIndex] = React.useState<string>("S&P 500");
 
@@ -26,7 +23,7 @@ export default function GlobalMarketsPage() {
                   Global Markets
                 </h1>
                 <p className="text-muted-foreground">
-                  Track major indices and commodities from markets around the
+                  Track major indices, commodities, bonds, and currencies from markets around the
                   world
                 </p>
               </div>
@@ -40,12 +37,7 @@ export default function GlobalMarketsPage() {
           <div className="grid grid-cols-1 gap-6">
             <ChartAreaInteractive selectedIndex={selectedIndex} />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <GlobalMarketHeatmap />
-              <MarketSummary />
-            </div>
-
-            <StockTable />
+            <MarketDataTable />
           </div>
         </div>
       </div>
