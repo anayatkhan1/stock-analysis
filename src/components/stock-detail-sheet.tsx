@@ -25,10 +25,17 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { ChartDataItem, MarketDataService, StockData, formatMarketCap, formatNumber, formatPercent } from "@/lib/data";
+import {
+  ChartDataItem,
+  MarketDataService,
+  StockData,
+  formatMarketCap,
+  formatNumber,
+  formatPercent,
+} from "@/lib/data";
 
 interface StockDetailSheetProps {
-  stock: StockData;
+  stock: StockData | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -54,7 +61,8 @@ export function StockDetailSheet({
   const [filteredData, setFilteredData] = React.useState<ChartDataItem[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
 
-  const isPositive = stock.changePercent > 0;
+  // Only calculate isPositive if stock exists
+  const isPositive = stock ? stock.changePercent > 0 : false;
 
   // Fetch historical data for the stock
   React.useEffect(() => {
@@ -63,8 +71,12 @@ export function StockDetailSheet({
 
       setIsLoading(true);
       try {
-        const historicalData = await MarketDataService.getStockHistoricalData(stock);
-        const formattedData = MarketDataService.formatChartData(historicalData).map(item => ({
+        const historicalData = await MarketDataService.getStockHistoricalData(
+          stock,
+        );
+        const formattedData = MarketDataService.formatChartData(
+          historicalData,
+        ).map(item => ({
           ...item,
           volume: item.volume * (stock.volume / 10), // Scale volume based on stock's volume
         }));
@@ -83,13 +95,33 @@ export function StockDetailSheet({
   React.useEffect(() => {
     const filtered = MarketDataService.filterDataByTimeRange(
       stockData,
-      timeRange as '1m' | '3m' | '6m' | '1y' | '5y'
+      timeRange as "1m" | "3m" | "6m" | "1y" | "5y",
     );
     setFilteredData(filtered);
   }, [timeRange, stockData]);
 
-  const chartChange = MarketDataService.calculateChange(filteredData);
+  // Calculate chart change only if we have data
+  const chartChange =
+    filteredData.length > 0
+      ? MarketDataService.calculateChange(filteredData)
+      : { value: 0, percent: "0.00" };
   const chartIsPositive = parseFloat(chartChange.percent as string) >= 0;
+
+  // If stock is null, render nothing or a placeholder
+  if (!stock) {
+    return (
+      <Sheet open={open} onOpenChange={onOpenChange}>
+        <SheetContent className="w-full overflow-y-auto p-5">
+          <SheetHeader className="px-1 pb-4">
+            <SheetTitle>No stock selected</SheetTitle>
+            <SheetDescription>
+              Please select a stock to view details
+            </SheetDescription>
+          </SheetHeader>
+        </SheetContent>
+      </Sheet>
+    );
+  }
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>

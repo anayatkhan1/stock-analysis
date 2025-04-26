@@ -2,12 +2,9 @@
 
 import * as React from "react";
 import { ChartAreaInteractive } from "@/components/chart-area-interactive";
-import { MarketSummary } from "@/components/market-summary";
 import { SectionCards } from "@/components/section-cards";
 import { MarketDataTable } from "@/components/market-data-table";
-import { GlobalMarketHeatmap } from "@/components/global-market-heatmap";
 import { Card, CardContent } from "@/components/ui/card";
-
 export default function GlobalMarketsPage() {
   const [selectedIndex, setSelectedIndex] = React.useState<string>("S&P 500");
 

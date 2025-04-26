@@ -13,7 +13,11 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { IconChartLine, IconChevronDown, IconSearch } from "@tabler/icons-react";
+import {
+  IconChartLine,
+  IconChevronDown,
+  IconSearch,
+} from "@tabler/icons-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -40,35 +44,40 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { MarketItemDetailSheet } from "@/components/market-item-detail-sheet";
-import { MarketDataService, formatPercent } from "@/lib/data";
-import { MarketItem } from "@/lib/data/types";
+import { StockDetailSheet } from "@/components/stock-detail-sheet";
+import { MarketDataService, formatNumber, formatPercent } from "@/lib/data";
+import { StockData } from "@/lib/data";
 
-export function MarketDataTable() {
-  const [activeTab, setActiveTab] = React.useState("indices");
-  const [sorting, setSorting] = React.useState<SortingState>([]);
+export function IndianMarketDataTable() {
+  const [activeTab, setActiveTab] = React.useState("stocks");
+  const [sorting, setSorting] = React.useState<SortingState>([
+    { id: "marketCap", desc: true },
+  ]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     [],
   );
   const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({});
+    React.useState<VisibilityState>({
+      volume: false,
+      pe: false,
+    });
   const [searchQuery, setSearchQuery] = React.useState("");
-  const [marketItems, setMarketItems] = React.useState<MarketItem[]>([]);
+  const [stocks, setStocks] = React.useState<StockData[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
-  const [selectedItem, setSelectedItem] = React.useState<MarketItem | null>(
+  const [selectedStock, setSelectedStock] = React.useState<StockData | null>(
     null,
   );
   const [sheetOpen, setSheetOpen] = React.useState(false);
 
-  // Fetch market data
+  // Fetch stocks data
   React.useEffect(() => {
     async function fetchData() {
       setIsLoading(true);
       try {
-        const items = await MarketDataService.getMarketItems();
-        setMarketItems(items);
+        const topStocks = await MarketDataService.getTopStocks();
+        setStocks(topStocks);
       } catch (error) {
-        console.error("Failed to fetch market items:", error);
+        console.error("Failed to fetch top stocks:", error);
       } finally {
         setIsLoading(false);
       }
@@ -77,94 +86,42 @@ export function MarketDataTable() {
     fetchData();
   }, []);
 
-  // Filter data based on active tab
-  const filteredData = React.useMemo(() => {
-    const typeMap: Record<string, "index" | "commodity" | "bond" | "currency"> =
-      {
-        indices: "index",
-        commodities: "commodity",
-        bonds: "bond",
-        currencies: "currency",
-      };
-
-    return marketItems.filter(item => item.type === typeMap[activeTab]);
-  }, [activeTab, marketItems]);
-
-  // Handle item click to open chart plotting sidebar
-  const handleItemClick = (item: MarketItem) => {
-    setSelectedItem(item);
+  // Handle stock click to open chart plotting sidebar
+  const handleStockClick = (stock: StockData) => {
+    setSelectedStock(stock);
     setSheetOpen(true);
   };
 
   // Define columns based on the data structure
-  const columns = React.useMemo<ColumnDef<MarketItem>[]>(() => {
-    const baseColumns: ColumnDef<MarketItem>[] = [
+  const columns = React.useMemo<ColumnDef<StockData>[]>(() => {
+    return [
       {
-        accessorKey: "name",
-        header: "Name",
+        accessorKey: "symbol",
+        header: "Symbol",
         cell: ({ row }) => (
-          <div className="font-medium">{row.getValue("name")}</div>
+          <div className="font-medium">{row.getValue("symbol")}</div>
         ),
       },
-    ];
-
-    // Add country column only for indices
-    if (activeTab === "indices") {
-      baseColumns.push({
-        accessorKey: "country",
-        header: "Country",
-        cell: ({ row }) => <div>{row.getValue("country")}</div>,
-      });
-    }
-
-    // Add trend column with badges
-    baseColumns.push({
-      accessorKey: "trend",
-      header: "Trend",
-      cell: ({ row }) => {
-        const trend = row.getValue("trend") as number[];
-        const firstValue = trend[0];
-        const lastValue = trend[trend.length - 1];
-        const percentChange = ((lastValue - firstValue) / firstValue) * 100;
-
-        // Determine trend strength
-        let strength: "Weak" | "Neutral" | "Strong" = "Neutral";
-        let variant: "default" | "secondary" | "destructive" | "outline" =
-          "secondary";
-
-        if (Math.abs(percentChange) < 1) {
-          strength = "Neutral";
-          variant = "secondary";
-        } else if (Math.abs(percentChange) > 5) {
-          strength = "Strong";
-          variant = percentChange > 0 ? "default" : "destructive";
-        } else {
-          strength = "Weak";
-          variant = percentChange > 0 ? "destructive" : "outline";
-        }
-
-        return (
-          <div className="flex items-center justify-start">
-            <Badge variant={variant}>{strength}</Badge>
-          </div>
-        );
-      },
-    });
-
-    // Add value and change columns
-    return [
-      ...baseColumns,
       {
-        accessorKey: "value",
-        header: () => <div className="text-right">Value</div>,
-        cell: ({ row }) => {
-          const value = row.getValue("value") as number;
-          return (
-            <div className="text-right font-medium">
-              {value < 10 ? value.toFixed(4) : value.toFixed(2)}
-            </div>
-          );
-        },
+        accessorKey: "name",
+        header: "Company",
+        cell: ({ row }) => <div>{row.getValue("name")}</div>,
+      },
+      {
+        accessorKey: "sector",
+        header: "Sector",
+        cell: ({ row }) => (
+          <Badge variant="outline" className="font-normal">
+            {row.getValue("sector")}
+          </Badge>
+        ),
+      },
+      {
+        accessorKey: "price",
+        header: () => <div className="text-right">Price</div>,
+        cell: ({ row }) => (
+          <div className="text-right font-medium">${row.getValue("price")}</div>
+        ),
       },
       {
         id: "actions",
@@ -177,7 +134,7 @@ export function MarketDataTable() {
                 className="h-8 w-8 p-0"
                 onClick={e => {
                   e.stopPropagation();
-                  handleItemClick(row.original);
+                  handleStockClick(row.original);
                 }}
               >
                 <IconChartLine className="h-4 w-4" />
@@ -188,10 +145,10 @@ export function MarketDataTable() {
         },
       },
       {
-        accessorKey: "change1D",
+        accessorKey: "changePercent",
         header: () => <div className="text-right">1D</div>,
         cell: ({ row }) => {
-          const change = row.getValue("change1D") as number;
+          const change = row.getValue("changePercent") as number;
           const isPositive = change > 0;
 
           return (
@@ -206,100 +163,43 @@ export function MarketDataTable() {
         },
       },
       {
-        accessorKey: "change1W",
-        header: () => <div className="text-right">1W</div>,
+        accessorKey: "volume",
+        header: () => <div className="text-right">Volume (M)</div>,
+        cell: ({ row }) => (
+          <div className="text-right">
+            {formatNumber(row.getValue("volume"))}
+          </div>
+        ),
+      },
+      {
+        accessorKey: "marketCap",
+        header: () => <div className="text-right">Market Cap</div>,
         cell: ({ row }) => {
-          const change = row.getValue("change1W") as number;
-          const isPositive = change > 0;
-
+          const marketCap = row.getValue("marketCap") as number;
           return (
-            <div
-              className={`text-right ${
-                isPositive ? "text-green-500" : "text-red-500"
-              }`}
-            >
-              {formatPercent(change)}
+            <div className="text-right">
+              $
+              {marketCap > 1000
+                ? `${(marketCap / 1000).toFixed(2)}T`
+                : `${marketCap}B`}
             </div>
           );
         },
       },
       {
-        accessorKey: "change1M",
-        header: () => <div className="text-right">1M</div>,
-        cell: ({ row }) => {
-          const change = row.getValue("change1M") as number;
-          const isPositive = change > 0;
-
-          return (
-            <div
-              className={`text-right ${
-                isPositive ? "text-green-500" : "text-red-500"
-              }`}
-            >
-              {formatPercent(change)}
-            </div>
-          );
-        },
-      },
-      {
-        accessorKey: "change3M",
-        header: () => <div className="text-right">3M</div>,
-        cell: ({ row }) => {
-          const change = row.getValue("change3M") as number;
-          const isPositive = change > 0;
-
-          return (
-            <div
-              className={`text-right ${
-                isPositive ? "text-green-500" : "text-red-500"
-              }`}
-            >
-              {formatPercent(change)}
-            </div>
-          );
-        },
-      },
-      {
-        accessorKey: "change6M",
-        header: () => <div className="text-right">6M</div>,
-        cell: ({ row }) => {
-          const change = row.getValue("change6M") as number;
-          const isPositive = change > 0;
-
-          return (
-            <div
-              className={`text-right ${
-                isPositive ? "text-green-500" : "text-red-500"
-              }`}
-            >
-              {formatPercent(change)}
-            </div>
-          );
-        },
-      },
-      {
-        accessorKey: "change1Y",
-        header: () => <div className="text-right">1Y</div>,
-        cell: ({ row }) => {
-          const change = row.getValue("change1Y") as number;
-          const isPositive = change > 0;
-
-          return (
-            <div
-              className={`text-right ${
-                isPositive ? "text-green-500" : "text-red-500"
-              }`}
-            >
-              {formatPercent(change)}
-            </div>
-          );
-        },
+        accessorKey: "pe",
+        header: () => <div className="text-right">P/E Ratio</div>,
+        cell: ({ row }) => (
+          <div className="text-right">
+            {(row.getValue("pe") as number).toFixed(1)}
+          </div>
+        ),
       },
     ];
-  }, [activeTab]);
+  }, []);
 
   const table = useReactTable({
-    data: filteredData,
+    data: stocks,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -331,10 +231,9 @@ export function MarketDataTable() {
     return (
       <Card className="data-[slot=card]:bg-gradient-to-t data-[slot=card]:from-primary/5 data-[slot=card]:to-card data-[slot=card]:shadow-xs dark:data-[slot=card]:bg-card">
         <CardHeader>
-          <CardTitle>Global Markets</CardTitle>
+          <CardTitle>Indian Markets</CardTitle>
           <CardDescription>
-            Track major indices, commodities, bonds, and currencies from markets
-            around the world
+            Track BSE and NSE stocks, indices, and market trends
           </CardDescription>
         </CardHeader>
         <CardContent className="h-[500px] flex items-center justify-center">
@@ -350,10 +249,9 @@ export function MarketDataTable() {
         <CardHeader>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <CardTitle>Global Markets</CardTitle>
+              <CardTitle>Indian Markets</CardTitle>
               <CardDescription>
-                Track major indices, commodities, bonds, and currencies from
-                markets around the world
+                Track BSE and NSE stocks, indices, and market trends
               </CardDescription>
             </div>
             <div className="flex items-center gap-2">
@@ -398,16 +296,15 @@ export function MarketDataTable() {
         </CardHeader>
         <CardContent>
           <Tabs
-            defaultValue="indices"
+            defaultValue="stocks"
             value={activeTab}
             onValueChange={setActiveTab}
             className="w-full"
           >
-            <TabsList className="mb-4 grid w-full grid-cols-4">
-              <TabsTrigger value="indices">Indices</TabsTrigger>
-              <TabsTrigger value="commodities">Commodities</TabsTrigger>
-              <TabsTrigger value="bonds">Bonds</TabsTrigger>
-              <TabsTrigger value="currencies">Currencies</TabsTrigger>
+            <TabsList className="mb-4 grid w-full grid-cols-3">
+              <TabsTrigger value="stocks">Stocks</TabsTrigger>
+              <TabsTrigger value="nse">NSE</TabsTrigger>
+              <TabsTrigger value="bse">BSE</TabsTrigger>
             </TabsList>
 
             <TabsContent value={activeTab} className="mt-0">
@@ -441,7 +338,7 @@ export function MarketDataTable() {
                           key={row.id}
                           data-state={row.getIsSelected() && "selected"}
                           className="cursor-pointer hover:bg-muted/50"
-                          onClick={() => handleItemClick(row.original)}
+                          onClick={() => handleStockClick(row.original)}
                         >
                           {row.getVisibleCells().map(cell => (
                             <TableCell key={cell.id}>
@@ -468,8 +365,8 @@ export function MarketDataTable() {
               </div>
               <div className="flex items-center justify-end space-x-2 py-4">
                 <div className="flex-1 text-muted-foreground text-sm">
-                  Showing {table.getRowModel().rows.length} of{" "}
-                  {filteredData.length} items
+                  Showing {table.getRowModel().rows.length} of {stocks.length}{" "}
+                  items
                 </div>
                 <div className="space-x-2">
                   <Button
@@ -495,9 +392,9 @@ export function MarketDataTable() {
         </CardContent>
       </Card>
 
-      {/* Market Item Detail Sheet */}
-      <MarketItemDetailSheet
-        item={selectedItem}
+      {/* Stock Detail Sheet */}
+      <StockDetailSheet
+        stock={selectedStock}
         open={sheetOpen}
         onOpenChange={setSheetOpen}
       />
