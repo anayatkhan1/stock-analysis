@@ -42,14 +42,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { StockDetailSheet } from "@/components/stock-detail-sheet";
 import { MarketDataService, formatNumber, formatPercent } from "@/lib/data";
 import { StockData } from "@/lib/data";
 
 export function IndianMarketDataTable() {
-  const [activeTab, setActiveTab] = React.useState("stocks");
   const [sorting, setSorting] = React.useState<SortingState>([
     { id: "marketCap", desc: true },
   ]);
@@ -120,7 +118,7 @@ export function IndianMarketDataTable() {
         accessorKey: "price",
         header: () => <div className="text-right">Price</div>,
         cell: ({ row }) => (
-          <div className="text-right font-medium">${row.getValue("price")}</div>
+          <div className="text-right font-medium">₹{row.getValue("price")}</div>
         ),
       },
       {
@@ -178,7 +176,7 @@ export function IndianMarketDataTable() {
           const marketCap = row.getValue("marketCap") as number;
           return (
             <div className="text-right">
-              $
+              ₹
               {marketCap > 1000
                 ? `${(marketCap / 1000).toFixed(2)}T`
                 : `${marketCap}B`}
@@ -194,6 +192,36 @@ export function IndianMarketDataTable() {
             {(row.getValue("pe") as number).toFixed(1)}
           </div>
         ),
+      },
+      // Add trend column similar to global markets table
+      {
+        id: "trend",
+        header: "Trend",
+        cell: ({ row }) => {
+          const changePercent = row.getValue("changePercent") as number;
+          const isPositive = changePercent > 0;
+          
+          // Determine trend strength
+          let strength: "Weak" | "Neutral" | "Strong" = "Neutral";
+          let variant: "default" | "secondary" | "destructive" | "outline" = "secondary";
+          
+          if (Math.abs(changePercent) < 1) {
+            strength = "Neutral";
+            variant = "secondary";
+          } else if (Math.abs(changePercent) > 3) {
+            strength = "Strong";
+            variant = isPositive ? "default" : "destructive";
+          } else {
+            strength = "Weak";
+            variant = isPositive ? "outline" : "destructive";
+          }
+          
+          return (
+            <div className="flex items-center justify-start">
+              <Badge variant={variant}>{strength}</Badge>
+            </div>
+          );
+        },
       },
     ];
   }, []);
@@ -295,100 +323,85 @@ export function IndianMarketDataTable() {
           </div>
         </CardHeader>
         <CardContent>
-          <Tabs
-            defaultValue="stocks"
-            value={activeTab}
-            onValueChange={setActiveTab}
-            className="w-full"
-          >
-            <TabsList className="mb-4 grid w-full grid-cols-3">
-              <TabsTrigger value="stocks">Stocks</TabsTrigger>
-              <TabsTrigger value="nse">NSE</TabsTrigger>
-              <TabsTrigger value="bse">BSE</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value={activeTab} className="mt-0">
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    {table.getHeaderGroups().map(headerGroup => (
-                      <TableRow key={headerGroup.id}>
-                        {headerGroup.headers.map(header => {
-                          return (
-                            <TableHead
-                              key={header.id}
-                              className="whitespace-nowrap"
-                            >
-                              {header.isPlaceholder
-                                ? null
-                                : flexRender(
-                                    header.column.columnDef.header,
-                                    header.getContext(),
-                                  )}
-                            </TableHead>
-                          );
-                        })}
-                      </TableRow>
-                    ))}
-                  </TableHeader>
-                  <TableBody>
-                    {table.getRowModel().rows?.length ? (
-                      table.getRowModel().rows.map(row => (
-                        <TableRow
-                          key={row.id}
-                          data-state={row.getIsSelected() && "selected"}
-                          className="cursor-pointer hover:bg-muted/50"
-                          onClick={() => handleStockClick(row.original)}
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                {table.getHeaderGroups().map(headerGroup => (
+                  <TableRow key={headerGroup.id}>
+                    {headerGroup.headers.map(header => {
+                      return (
+                        <TableHead
+                          key={header.id}
+                          className="whitespace-nowrap"
                         >
-                          {row.getVisibleCells().map(cell => (
-                            <TableCell key={cell.id}>
-                              {flexRender(
-                                cell.column.columnDef.cell,
-                                cell.getContext(),
+                          {header.isPlaceholder
+                            ? null
+                            : flexRender(
+                                header.column.columnDef.header,
+                                header.getContext(),
                               )}
-                            </TableCell>
-                          ))}
-                        </TableRow>
-                      ))
-                    ) : (
-                      <TableRow>
-                        <TableCell
-                          colSpan={columns.length}
-                          className="h-24 text-center"
-                        >
-                          No results.
+                        </TableHead>
+                      );
+                    })}
+                  </TableRow>
+                ))}
+              </TableHeader>
+              <TableBody>
+                {table.getRowModel().rows?.length ? (
+                  table.getRowModel().rows.map(row => (
+                    <TableRow
+                      key={row.id}
+                      data-state={row.getIsSelected() && "selected"}
+                      className="cursor-pointer hover:bg-muted/50"
+                      onClick={() => handleStockClick(row.original)}
+                    >
+                      {row.getVisibleCells().map(cell => (
+                        <TableCell key={cell.id}>
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext(),
+                          )}
                         </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
-              <div className="flex items-center justify-end space-x-2 py-4">
-                <div className="flex-1 text-muted-foreground text-sm">
-                  Showing {table.getRowModel().rows.length} of {stocks.length}{" "}
-                  items
-                </div>
-                <div className="space-x-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => table.previousPage()}
-                    disabled={!table.getCanPreviousPage()}
-                  >
-                    Previous
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => table.nextPage()}
-                    disabled={!table.getCanNextPage()}
-                  >
-                    Next
-                  </Button>
-                </div>
-              </div>
-            </TabsContent>
-          </Tabs>
+                      ))}
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell
+                      colSpan={columns.length}
+                      className="h-24 text-center"
+                    >
+                      No results.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+          <div className="flex items-center justify-end space-x-2 py-4">
+            <div className="flex-1 text-muted-foreground text-sm">
+              Showing {table.getRowModel().rows.length} of {stocks.length}{" "}
+              items
+            </div>
+            <div className="space-x-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => table.previousPage()}
+                disabled={!table.getCanPreviousPage()}
+              >
+                Previous
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => table.nextPage()}
+                disabled={!table.getCanNextPage()}
+              >
+                Next
+              </Button>
+            </div>
+          </div>
         </CardContent>
       </Card>
 

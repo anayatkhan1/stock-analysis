@@ -6,6 +6,11 @@ import {
   IconChartLine,
   IconTrendingDown,
   IconTrendingUp,
+  IconInfoCircle,
+  IconArrowUpRight,
+  IconArrowDownRight,
+  IconChartBar,
+  IconChartCandle,
 } from "@tabler/icons-react";
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
@@ -111,7 +116,7 @@ export function StockDetailSheet({
   if (!stock) {
     return (
       <Sheet open={open} onOpenChange={onOpenChange}>
-        <SheetContent className="w-full overflow-y-auto p-5">
+        <SheetContent className="w-full sm:max-w-md md:max-w-lg lg:max-w-xl overflow-y-auto p-5">
           <SheetHeader className="px-1 pb-4">
             <SheetTitle>No stock selected</SheetTitle>
             <SheetDescription>
@@ -123,9 +128,19 @@ export function StockDetailSheet({
     );
   }
 
+  // Simulate weekly, monthly, and quarterly changes based on daily change
+  // In a real app, these would come from the API
+  const simulatedChanges = {
+    week1: stock.changePercent * (Math.random() * 2 + 3), // 3-5x daily change
+    month1: stock.changePercent * (Math.random() * 3 + 5), // 5-8x daily change
+    month3: stock.changePercent * (Math.random() * 5 + 8), // 8-13x daily change
+    month6: stock.changePercent * (Math.random() * 8 + 10), // 10-18x daily change
+    year1: stock.changePercent * (Math.random() * 10 + 15), // 15-25x daily change
+  };
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full overflow-y-auto p-5">
+      <SheetContent className="w-full sm:max-w-md md:max-w-lg lg:max-w-xl overflow-y-auto p-5">
         <SheetHeader className="px-1 pb-4">
           <div className="flex items-center justify-between">
             <div>
@@ -151,60 +166,174 @@ export function StockDetailSheet({
         </SheetHeader>
 
         <Tabs defaultValue="overview" className="mt-2">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="chart">Chart</TabsTrigger>
+            <TabsTrigger value="analysis">Analysis</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="mt-4 space-y-6 px-1">
-            <div className="grid grid-cols-2 gap-6">
-              <div className="space-y-1">
-                <p className="text-muted-foreground text-sm">Price</p>
-                <p className="font-medium text-xl">${stock.price}</p>
+            <div className="flex items-center justify-between p-4 rounded-md border bg-muted/30">
+              <div>
+                <p className="text-muted-foreground text-sm">Current Price</p>
+                <p className="font-medium text-2xl">₹{stock.price.toLocaleString()}</p>
               </div>
-              <div className="space-y-1">
-                <p className="text-muted-foreground text-sm">Change</p>
-                <p
-                  className={`font-met-medimedium ${
-                    isPositive ? "text-green-500" : "text-red-500"
-                  }`}
-                >
-                  ${stock.change.toFixed(2)} (
-                  {formatPercent(stock.changePercent)})
-                </p>
-              </div>
-              <div className="space-y-1">
-                <p className="text-muted-foreground text-sm">Market Cap</p>
-                <p className="">{formatMarketCap(stock.marketCap)}</p>
-              </div>
-              <div className="space-y-1">
-                <p className="text-muted-foreground text-sm">P/E Ratio</p>
-                <p>{stock.pe.toFixed(1)}</p>
+              <div className="text-right">
+                <p className="text-muted-foreground text-sm">1 Day Change</p>
+                <div className="flex items-center gap-1 justify-end">
+                  {isPositive ? (
+                    <IconArrowUpRight className="size-4 text-green-500" />
+                  ) : (
+                    <IconArrowDownRight className="size-4 text-red-500" />
+                  )}
+                  <p
+                    className={`font-medium text-lg ${
+                      isPositive ? "text-green-500" : "text-red-500"
+                    }`}
+                  >
+                    {formatPercent(stock.changePercent)}
+                  </p>
+                </div>
               </div>
             </div>
 
             <div className="space-y-3">
-              <h3 className="font-semibold">Additional Information</h3>
+              <div className="flex items-center gap-2">
+                <IconChartLine className="size-5" />
+                <h3 className="font-semibold">Performance</h3>
+              </div>
+
+              <div className="grid grid-cols-1 gap-3">
+                <div className="flex items-center justify-between rounded-md border p-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium">1 Week</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    {simulatedChanges.week1 > 0 ? (
+                      <IconArrowUpRight className="size-4 text-green-500" />
+                    ) : (
+                      <IconArrowDownRight className="size-4 text-red-500" />
+                    )}
+                    <span
+                      className={`font-medium ${
+                        simulatedChanges.week1 > 0 ? "text-green-500" : "text-red-500"
+                      }`}
+                    >
+                      {formatPercent(simulatedChanges.week1)}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between rounded-md border p-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium">1 Month</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    {simulatedChanges.month1 > 0 ? (
+                      <IconArrowUpRight className="size-4 text-green-500" />
+                    ) : (
+                      <IconArrowDownRight className="size-4 text-red-500" />
+                    )}
+                    <span
+                      className={`font-medium ${
+                        simulatedChanges.month1 > 0 ? "text-green-500" : "text-red-500"
+                      }`}
+                    >
+                      {formatPercent(simulatedChanges.month1)}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between rounded-md border p-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium">3 Months</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    {simulatedChanges.month3 > 0 ? (
+                      <IconArrowUpRight className="size-4 text-green-500" />
+                    ) : (
+                      <IconArrowDownRight className="size-4 text-red-500" />
+                    )}
+                    <span
+                      className={`font-medium ${
+                        simulatedChanges.month3 > 0 ? "text-green-500" : "text-red-500"
+                      }`}
+                    >
+                      {formatPercent(simulatedChanges.month3)}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between rounded-md border p-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium">6 Months</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    {simulatedChanges.month6 > 0 ? (
+                      <IconArrowUpRight className="size-4 text-green-500" />
+                    ) : (
+                      <IconArrowDownRight className="size-4 text-red-500" />
+                    )}
+                    <span
+                      className={`font-medium ${
+                        simulatedChanges.month6 > 0 ? "text-green-500" : "text-red-500"
+                      }`}
+                    >
+                      {formatPercent(simulatedChanges.month6)}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between rounded-md border p-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium">1 Year</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    {simulatedChanges.year1 > 0 ? (
+                      <IconArrowUpRight className="size-4 text-green-500" />
+                    ) : (
+                      <IconArrowDownRight className="size-4 text-red-500" />
+                    )}
+                    <span
+                      className={`font-medium ${
+                        simulatedChanges.year1 > 0 ? "text-green-500" : "text-red-500"
+                      }`}
+                    >
+                      {formatPercent(simulatedChanges.year1)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <h3 className="font-semibold">Company Information</h3>
               <div className="rounded-md border p-5">
                 <div className="grid grid-cols-2 gap-6">
+                  <div className="space-y-1">
+                    <p className="text-muted-foreground text-sm">Market Cap</p>
+                    <p className="font-medium">{formatMarketCap(stock.marketCap)}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-muted-foreground text-sm">P/E Ratio</p>
+                    <p className="font-medium">{stock.pe.toFixed(1)}</p>
+                  </div>
                   <div className="space-y-1">
                     <p className="text-muted-foreground text-sm">Volume</p>
                     <p className="font-medium">{formatNumber(stock.volume)}M</p>
                   </div>
                   <div className="space-y-1">
                     <p className="text-muted-foreground text-sm">Sector</p>
-                    <p className="">{stock.sector}</p>
-                  </div>
-                  <div className="col-span-2">
-                    <p className="text-muted-foreground text-sm">
-                      Last Updated
-                    </p>
-                    <p className="flex items-center gap-1">
-                      <IconCalendar className="size-4 text-muted-foreground" />
-                      {new Date(stock.lastUpdated).toLocaleString()}
-                    </p>
+                    <p className="font-medium">{stock.sector}</p>
                   </div>
                 </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between mt-2 text-sm text-muted-foreground">
+              <div className="flex items-center gap-1">
+                <IconCalendar className="size-4" />
+                <span>Last Updated: {new Date(stock.lastUpdated).toLocaleDateString()}</span>
               </div>
             </div>
           </TabsContent>
@@ -352,6 +481,149 @@ export function StockDetailSheet({
                   </AreaChart>
                 </ChartContainer>
               )}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="analysis" className="mt-4 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <IconChartBar className="size-5" />
+                <h3 className="font-medium">Technical Analysis</h3>
+              </div>
+            </div>
+
+            <div className="rounded-md border p-5 space-y-4">
+              <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-1">
+                  <p className="text-muted-foreground text-sm">
+                    Trend Strength
+                  </p>
+                  <div className="flex items-center gap-2">
+                    {Math.abs(stock.changePercent) > 3 ? (
+                      <Badge
+                        variant={isPositive ? "default" : "destructive"}
+                      >
+                        Strong
+                      </Badge>
+                    ) : Math.abs(stock.changePercent) > 1 ? (
+                      <Badge
+                        variant={isPositive ? "default" : "destructive"}
+                      >
+                        Moderate
+                      </Badge>
+                    ) : (
+                      <Badge variant="secondary">Weak</Badge>
+                    )}
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-muted-foreground text-sm">Volatility</p>
+                  <div className="flex items-center gap-2">
+                    {stock.volume > 10 ? (
+                      <Badge variant="outline">High</Badge>
+                    ) : stock.volume < 5 ? (
+                      <Badge variant="outline">Low</Badge>
+                    ) : (
+                      <Badge variant="outline">Medium</Badge>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-muted-foreground text-sm">
+                  Performance Indicators
+                </p>
+                <div className="grid grid-cols-1 gap-2">
+                  <div className="flex items-center justify-between rounded-md border p-3">
+                    <div className="flex items-center gap-2">
+                      <IconArrowUpRight
+                        className={`size-4 ${
+                          stock.changePercent > 0 ? "text-green-500" : "text-red-500"
+                        }`}
+                      />
+                      <span>Short-term Momentum</span>
+                    </div>
+                    <Badge
+                      variant={
+                        stock.changePercent > 0 && simulatedChanges.week1 > 0
+                          ? "default"
+                          : "destructive"
+                      }
+                    >
+                      {stock.changePercent > 0 && simulatedChanges.week1 > 0
+                        ? "Bullish"
+                        : "Bearish"}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between rounded-md border p-3">
+                    <div className="flex items-center gap-2">
+                      <IconChartLine
+                        className={`size-4 ${
+                          simulatedChanges.month1 > 0 ? "text-green-500" : "text-red-500"
+                        }`}
+                      />
+                      <span>Medium-term Trend</span>
+                    </div>
+                    <Badge
+                      variant={
+                        simulatedChanges.month1 > 0 && simulatedChanges.month3 > 0
+                          ? "default"
+                          : "destructive"
+                      }
+                    >
+                      {simulatedChanges.month1 > 0 && simulatedChanges.month3 > 0
+                        ? "Bullish"
+                        : "Bearish"}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between rounded-md border p-3">
+                    <div className="flex items-center gap-2">
+                      <IconChartCandle
+                        className={`size-4 ${
+                          simulatedChanges.month6 > 0 ? "text-green-500" : "text-red-500"
+                        }`}
+                      />
+                      <span>Long-term Outlook</span>
+                    </div>
+                    <Badge
+                      variant={
+                        simulatedChanges.month6 > 0 && simulatedChanges.year1 > 0
+                          ? "default"
+                          : "destructive"
+                      }
+                    >
+                      {simulatedChanges.month6 > 0 && simulatedChanges.year1 > 0
+                        ? "Bullish"
+                        : "Bearish"}
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-md border p-5">
+              <div className="flex items-center gap-2 mb-4">
+                <IconInfoCircle className="size-5 text-muted-foreground" />
+                <h3 className="font-medium">Stock Insights</h3>
+              </div>
+              <p className="text-muted-foreground text-sm mb-4">
+                {stock.name} is a {stock.sector} company listed on the Indian stock market.
+                With a market cap of {formatMarketCap(stock.marketCap)} and P/E ratio of {stock.pe.toFixed(1)},
+                it {stock.pe < 15 ? "may be considered undervalued compared to industry peers" : 
+                   stock.pe > 30 ? "trades at a premium compared to industry peers" : 
+                   "is trading at a valuation in line with industry peers"}.
+              </p>
+              <p className="text-sm">
+                {chartIsPositive
+                  ? `The ${timeRange} trend shows positive momentum with a ${chartChange.percent}% increase.`
+                  : `The ${timeRange} trend shows negative pressure with a ${chartChange.percent}% decrease.`}{" "}
+                {simulatedChanges.week1 > 0 && simulatedChanges.month1 > 0 && simulatedChanges.month3 > 0
+                  ? "Short, medium, and long-term indicators all suggest bullish sentiment."
+                  : simulatedChanges.week1 < 0 && simulatedChanges.month1 < 0 && simulatedChanges.month3 < 0
+                  ? "Short, medium, and long-term indicators all suggest bearish sentiment."
+                  : "Mixed signals across different timeframes suggest market uncertainty."}
+              </p>
             </div>
           </TabsContent>
         </Tabs>
