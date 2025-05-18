@@ -1,46 +1,9 @@
-"use client";
-
-import * as React from "react";
-import { ChartAreaInteractive } from "@/components/chart-area-interactive";
-import { SectionCards } from "@/components/section-cards";
 import { MarketDataTable } from "@/components/market-data-table";
-import { Card, CardContent } from "@/components/ui/card";
+
 export default function GlobalMarketsPage() {
-  const [selectedIndex, setSelectedIndex] = React.useState<string>("S&P 500");
-
-  const handleSelectIndex = (indexName: string) => {
-    setSelectedIndex(indexName);
-  };
-
   return (
-    <>
-      <div className="space-y-6">
-        <div className="px-4 lg:px-6">
-          <Card className="bg-background">
-            <CardContent className="p-6">
-              <div className="flex flex-col gap-2">
-                <h1 className="text-3xl font-bold tracking-tight">
-                  Global Markets
-                </h1>
-                <p className="text-muted-foreground">
-                  Track major indices, commodities, bonds, and currencies from markets around the
-                  world
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="px-4 lg:px-6 space-y-6">
-          <SectionCards onSelectIndex={handleSelectIndex} />
-
-          <div className="grid grid-cols-1 gap-6">
-            <ChartAreaInteractive selectedIndex={selectedIndex} />
-
-            <MarketDataTable />
-          </div>
-        </div>
-      </div>
-    </>
+    <div className="px-4">
+      <MarketDataTable />
+    </div>
   );
 }
