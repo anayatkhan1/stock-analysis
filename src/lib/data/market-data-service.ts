@@ -197,4 +197,36 @@ export class MarketDataService {
 		const items = await this.getMarketItems();
 		return items.filter(item => item.type === type);
 	}
+
+	/**
+	 * Get a stock by symbol or name
+	 */
+	static async getStockBySymbolOrName(symbolOrName: string): Promise<StockData | null> {
+		// In the future, replace with API call
+		// return fetch(`/api/stocks/${symbolOrName}`).then(res => res.json());
+		
+		// Get all stocks
+		const stocks = await this.getTopStocks();
+		
+		// Normalize the input for case-insensitive comparison
+		const normalizedInput = symbolOrName.toLowerCase().replace(/-/g, ' ');
+		
+		// First try to find by exact symbol match
+		let stock = stocks.find(s => s.symbol.toLowerCase() === normalizedInput);
+		
+		// If not found, try to find by name
+		if (!stock) {
+			stock = stocks.find(s => s.name.toLowerCase() === normalizedInput);
+		}
+		
+		// If still not found, try partial matches
+		if (!stock) {
+			stock = stocks.find(s => 
+				s.symbol.toLowerCase().includes(normalizedInput) || 
+				s.name.toLowerCase().includes(normalizedInput)
+			);
+		}
+		
+		return stock || null;
+	}
 }
