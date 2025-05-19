@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import {
   IconCalendar,
   IconChartLine,
@@ -15,6 +16,7 @@ import {
   IconArrowDownRight,
   IconChartBar,
   IconChartCandle,
+  IconMaximize,
 } from "@tabler/icons-react";
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
@@ -26,6 +28,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   ChartConfig,
@@ -55,10 +58,20 @@ export function MarketItemDetailSheet({
   open,
   onOpenChange,
 }: MarketItemDetailSheetProps) {
+  const router = useRouter();
   const [timeRange, setTimeRange] = React.useState("3m");
   const [chartData, setChartData] = React.useState<ChartDataItem[]>([]);
   const [filteredData, setFilteredData] = React.useState<ChartDataItem[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
+
+  // Function to navigate to full chart view
+  const navigateToFullChart = () => {
+    if (item) {
+      // Create a URL-friendly version of the stock name
+      const stockNameSlug = item.name.toLowerCase().replace(/\s+/g, "-");
+      router.push(`/app/global/${stockNameSlug}/chart`);
+    }
+  };
 
   // Fetch historical data for the market item
   React.useEffect(() => {
@@ -324,20 +337,31 @@ export function MarketItemDetailSheet({
                 <IconChartLine className="size-5" />
                 <h3 className="font-medium">Price History</h3>
               </div>
-              <Badge
-                variant="outline"
-                className={`flex items-center gap-1 ${
-                  chartIsPositive ? "text-green-500" : "text-red-500"
-                }`}
-              >
-                {chartIsPositive ? (
-                  <IconTrendingUp className="size-4" />
-                ) : (
-                  <IconTrendingDown className="size-4" />
-                )}
-                {chartIsPositive ? "+" : ""}
-                {chartChange.percent}%
-              </Badge>
+              <div className="flex items-center gap-2">
+                <Badge
+                  variant="outline"
+                  className={`flex items-center gap-1 ${
+                    chartIsPositive ? "text-green-500" : "text-red-500"
+                  }`}
+                >
+                  {chartIsPositive ? (
+                    <IconTrendingUp className="size-4" />
+                  ) : (
+                    <IconTrendingDown className="size-4" />
+                  )}
+                  {chartIsPositive ? "+" : ""}
+                  {chartChange.percent}%
+                </Badge>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-1"
+                  onClick={navigateToFullChart}
+                >
+                  <IconMaximize className="size-4" />
+                  <span>Full Chart</span>
+                </Button>
+              </div>
             </div>
 
             <div className="flex justify-end">
