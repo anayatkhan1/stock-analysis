@@ -13,7 +13,11 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { IconChartLine, IconChevronDown, IconSearch } from "@tabler/icons-react";
+import {
+  IconChartLine,
+  IconChevronDown,
+  IconSearch,
+} from "@tabler/icons-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -170,20 +174,18 @@ export function MarketDataTable() {
         id: "actions",
         cell: ({ row }) => {
           return (
-            <div className="text-right">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 w-8 p-0"
-                onClick={e => {
-                  e.stopPropagation();
-                  handleItemClick(row.original);
-                }}
-              >
-                <IconChartLine className="h-4 w-4" />
-                <span className="sr-only">View details</span>
-              </Button>
-            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0"
+              onClick={e => {
+                e.stopPropagation();
+                handleItemClick(row.original);
+              }}
+            >
+              <IconChartLine className="h-4 w-4" />
+              <span className="sr-only">View details</span>
+            </Button>
           );
         },
       },

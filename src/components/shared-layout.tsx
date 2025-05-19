@@ -12,14 +12,11 @@ interface SharedLayoutProps {
 export function SharedLayout({ children }: SharedLayoutProps) {
   const pathname = usePathname();
 
-
   const isAppPath = pathname.startsWith("/app");
-
 
   if (!isAppPath) {
     return <>{children}</>;
   }
-
 
   return (
     <SidebarProvider

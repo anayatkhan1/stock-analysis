@@ -11,7 +11,9 @@ import {
   IconArrowDownRight,
   IconChartBar,
   IconChartCandle,
+  IconMaximize,
 } from "@tabler/icons-react";
+import { useRouter } from "next/navigation";
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
 import {
@@ -22,6 +24,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   ChartConfig,
@@ -61,6 +64,7 @@ export function StockDetailSheet({
   open,
   onOpenChange,
 }: StockDetailSheetProps) {
+  const router = useRouter();
   const [timeRange, setTimeRange] = React.useState("3m");
   const [stockData, setStockData] = React.useState<ChartDataItem[]>([]);
   const [filteredData, setFilteredData] = React.useState<ChartDataItem[]>([]);
@@ -112,6 +116,20 @@ export function StockDetailSheet({
       : { value: 0, percent: "0.00" };
   const chartIsPositive = parseFloat(chartChange.percent as string) >= 0;
 
+  // Function to navigate to full chart view
+  const handleViewFullChart = () => {
+    if (!stock) return;
+
+    // Create a URL-friendly version of the stock name
+    const stockNameSlug = stock.name.toLowerCase().replace(/\s+/g, "-");
+
+    // Navigate to the full chart page
+    router.push(`/app/indian/${stockNameSlug}/chart`);
+
+    // Close the sheet
+    onOpenChange(false);
+  };
+
   // If stock is null, render nothing or a placeholder
   if (!stock) {
     return (
@@ -140,7 +158,7 @@ export function StockDetailSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full sm:max-w-md md:max-w-lg lg:max-w-xl overflow-y-auto p-5">
+      <SheetContent className="w-full sm:max-w-md  md:max-w-lg lg:max-w-xl overflow-y-auto p-5">
         <SheetHeader className="px-1 pb-4">
           <div className="flex items-center justify-between">
             <div>
@@ -176,7 +194,9 @@ export function StockDetailSheet({
             <div className="flex items-center justify-between p-4 rounded-md border bg-muted/30">
               <div>
                 <p className="text-muted-foreground text-sm">Current Price</p>
-                <p className="font-medium text-2xl">₹{stock.price.toLocaleString()}</p>
+                <p className="font-medium text-2xl">
+                  ₹{stock.price.toLocaleString()}
+                </p>
               </div>
               <div className="text-right">
                 <p className="text-muted-foreground text-sm">1 Day Change</p>
@@ -216,7 +236,9 @@ export function StockDetailSheet({
                     )}
                     <span
                       className={`font-medium ${
-                        simulatedChanges.week1 > 0 ? "text-green-500" : "text-red-500"
+                        simulatedChanges.week1 > 0
+                          ? "text-green-500"
+                          : "text-red-500"
                       }`}
                     >
                       {formatPercent(simulatedChanges.week1)}
@@ -236,7 +258,9 @@ export function StockDetailSheet({
                     )}
                     <span
                       className={`font-medium ${
-                        simulatedChanges.month1 > 0 ? "text-green-500" : "text-red-500"
+                        simulatedChanges.month1 > 0
+                          ? "text-green-500"
+                          : "text-red-500"
                       }`}
                     >
                       {formatPercent(simulatedChanges.month1)}
@@ -256,7 +280,9 @@ export function StockDetailSheet({
                     )}
                     <span
                       className={`font-medium ${
-                        simulatedChanges.month3 > 0 ? "text-green-500" : "text-red-500"
+                        simulatedChanges.month3 > 0
+                          ? "text-green-500"
+                          : "text-red-500"
                       }`}
                     >
                       {formatPercent(simulatedChanges.month3)}
@@ -276,7 +302,9 @@ export function StockDetailSheet({
                     )}
                     <span
                       className={`font-medium ${
-                        simulatedChanges.month6 > 0 ? "text-green-500" : "text-red-500"
+                        simulatedChanges.month6 > 0
+                          ? "text-green-500"
+                          : "text-red-500"
                       }`}
                     >
                       {formatPercent(simulatedChanges.month6)}
@@ -296,7 +324,9 @@ export function StockDetailSheet({
                     )}
                     <span
                       className={`font-medium ${
-                        simulatedChanges.year1 > 0 ? "text-green-500" : "text-red-500"
+                        simulatedChanges.year1 > 0
+                          ? "text-green-500"
+                          : "text-red-500"
                       }`}
                     >
                       {formatPercent(simulatedChanges.year1)}
@@ -312,7 +342,9 @@ export function StockDetailSheet({
                 <div className="grid grid-cols-2 gap-6">
                   <div className="space-y-1">
                     <p className="text-muted-foreground text-sm">Market Cap</p>
-                    <p className="font-medium">{formatMarketCap(stock.marketCap)}</p>
+                    <p className="font-medium">
+                      {formatMarketCap(stock.marketCap)}
+                    </p>
                   </div>
                   <div className="space-y-1">
                     <p className="text-muted-foreground text-sm">P/E Ratio</p>
@@ -333,7 +365,10 @@ export function StockDetailSheet({
             <div className="flex items-center justify-between mt-2 text-sm text-muted-foreground">
               <div className="flex items-center gap-1">
                 <IconCalendar className="size-4" />
-                <span>Last Updated: {new Date(stock.lastUpdated).toLocaleDateString()}</span>
+                <span>
+                  Last Updated:{" "}
+                  {new Date(stock.lastUpdated).toLocaleDateString()}
+                </span>
               </div>
             </div>
           </TabsContent>
@@ -344,20 +379,31 @@ export function StockDetailSheet({
                 <IconChartLine className="size-5" />
                 <h3 className="font-medium">Price History</h3>
               </div>
-              <Badge
-                variant="outline"
-                className={`flex items-center gap-1 ${
-                  chartIsPositive ? "text-green-500" : "text-red-500"
-                }`}
-              >
-                {chartIsPositive ? (
-                  <IconTrendingUp className="size-4" />
-                ) : (
-                  <IconTrendingDown className="size-4" />
-                )}
-                {chartIsPositive ? "+" : ""}
-                {chartChange.percent}%
-              </Badge>
+              <div className="flex items-center gap-3">
+                <Badge
+                  variant="outline"
+                  className={`flex items-center gap-1 ${
+                    chartIsPositive ? "text-green-500" : "text-red-500"
+                  }`}
+                >
+                  {chartIsPositive ? (
+                    <IconTrendingUp className="size-4" />
+                  ) : (
+                    <IconTrendingDown className="size-4" />
+                  )}
+                  {chartIsPositive ? "+" : ""}
+                  {chartChange.percent}%
+                </Badge>
+                <Button
+                  onClick={handleViewFullChart}
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-1"
+                >
+                  <IconMaximize className="size-4" />
+                  <span>Full Chart</span>
+                </Button>
+              </div>
             </div>
 
             <div className="flex justify-end">
@@ -500,15 +546,11 @@ export function StockDetailSheet({
                   </p>
                   <div className="flex items-center gap-2">
                     {Math.abs(stock.changePercent) > 3 ? (
-                      <Badge
-                        variant={isPositive ? "default" : "destructive"}
-                      >
+                      <Badge variant={isPositive ? "default" : "destructive"}>
                         Strong
                       </Badge>
                     ) : Math.abs(stock.changePercent) > 1 ? (
-                      <Badge
-                        variant={isPositive ? "default" : "destructive"}
-                      >
+                      <Badge variant={isPositive ? "default" : "destructive"}>
                         Moderate
                       </Badge>
                     ) : (
@@ -539,7 +581,9 @@ export function StockDetailSheet({
                     <div className="flex items-center gap-2">
                       <IconArrowUpRight
                         className={`size-4 ${
-                          stock.changePercent > 0 ? "text-green-500" : "text-red-500"
+                          stock.changePercent > 0
+                            ? "text-green-500"
+                            : "text-red-500"
                         }`}
                       />
                       <span>Short-term Momentum</span>
@@ -560,19 +604,23 @@ export function StockDetailSheet({
                     <div className="flex items-center gap-2">
                       <IconChartLine
                         className={`size-4 ${
-                          simulatedChanges.month1 > 0 ? "text-green-500" : "text-red-500"
+                          simulatedChanges.month1 > 0
+                            ? "text-green-500"
+                            : "text-red-500"
                         }`}
                       />
                       <span>Medium-term Trend</span>
                     </div>
                     <Badge
                       variant={
-                        simulatedChanges.month1 > 0 && simulatedChanges.month3 > 0
+                        simulatedChanges.month1 > 0 &&
+                        simulatedChanges.month3 > 0
                           ? "default"
                           : "destructive"
                       }
                     >
-                      {simulatedChanges.month1 > 0 && simulatedChanges.month3 > 0
+                      {simulatedChanges.month1 > 0 &&
+                      simulatedChanges.month3 > 0
                         ? "Bullish"
                         : "Bearish"}
                     </Badge>
@@ -581,14 +629,17 @@ export function StockDetailSheet({
                     <div className="flex items-center gap-2">
                       <IconChartCandle
                         className={`size-4 ${
-                          simulatedChanges.month6 > 0 ? "text-green-500" : "text-red-500"
+                          simulatedChanges.month6 > 0
+                            ? "text-green-500"
+                            : "text-red-500"
                         }`}
                       />
                       <span>Long-term Outlook</span>
                     </div>
                     <Badge
                       variant={
-                        simulatedChanges.month6 > 0 && simulatedChanges.year1 > 0
+                        simulatedChanges.month6 > 0 &&
+                        simulatedChanges.year1 > 0
                           ? "default"
                           : "destructive"
                       }
@@ -608,19 +659,28 @@ export function StockDetailSheet({
                 <h3 className="font-medium">Stock Insights</h3>
               </div>
               <p className="text-muted-foreground text-sm mb-4">
-                {stock.name} is a {stock.sector} company listed on the Indian stock market.
-                With a market cap of {formatMarketCap(stock.marketCap)} and P/E ratio of {stock.pe.toFixed(1)},
-                it {stock.pe < 15 ? "may be considered undervalued compared to industry peers" : 
-                   stock.pe > 30 ? "trades at a premium compared to industry peers" : 
-                   "is trading at a valuation in line with industry peers"}.
+                {stock.name} is a {stock.sector} company listed on the Indian
+                stock market. With a market cap of{" "}
+                {formatMarketCap(stock.marketCap)} and P/E ratio of{" "}
+                {stock.pe.toFixed(1)}, it{" "}
+                {stock.pe < 15
+                  ? "may be considered undervalued compared to industry peers"
+                  : stock.pe > 30
+                  ? "trades at a premium compared to industry peers"
+                  : "is trading at a valuation in line with industry peers"}
+                .
               </p>
               <p className="text-sm">
                 {chartIsPositive
                   ? `The ${timeRange} trend shows positive momentum with a ${chartChange.percent}% increase.`
                   : `The ${timeRange} trend shows negative pressure with a ${chartChange.percent}% decrease.`}{" "}
-                {simulatedChanges.week1 > 0 && simulatedChanges.month1 > 0 && simulatedChanges.month3 > 0
+                {simulatedChanges.week1 > 0 &&
+                simulatedChanges.month1 > 0 &&
+                simulatedChanges.month3 > 0
                   ? "Short, medium, and long-term indicators all suggest bullish sentiment."
-                  : simulatedChanges.week1 < 0 && simulatedChanges.month1 < 0 && simulatedChanges.month3 < 0
+                  : simulatedChanges.week1 < 0 &&
+                    simulatedChanges.month1 < 0 &&
+                    simulatedChanges.month3 < 0
                   ? "Short, medium, and long-term indicators all suggest bearish sentiment."
                   : "Mixed signals across different timeframes suggest market uncertainty."}
               </p>
