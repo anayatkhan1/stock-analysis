@@ -8,7 +8,7 @@ import {
   IconTrendingDown,
   IconArrowLeft,
 } from "@tabler/icons-react";
-import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis, Line } from "recharts";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -20,13 +20,37 @@ import {
 } from "@/components/ui/chart";
 import { ChartDataItem, MarketDataService } from "@/lib/data";
 import { useRouter } from "next/navigation";
+import { ChartTechnicalAnalysis } from "@/components/chart-technical-analysis";
 
-const chartConfig = {
-  price: {
-    label: "Value",
-    color: "hsl(var(--chart-1))",
-  },
-} satisfies ChartConfig;
+interface TechnicalIndicator {
+  id: string;
+  data: (number | null)[];
+  options: {
+    period: number;
+    color: string;
+    name: string;
+  };
+}
+
+// Create dynamic chart config that includes technical indicators
+const getChartConfig = (indicators: TechnicalIndicator[]): ChartConfig => {
+  const config: ChartConfig = {
+    price: {
+      label: "Value",
+      color: "hsl(var(--chart-1))",
+    },
+  };
+
+  // Add technical indicators to the config
+  indicators.forEach(indicator => {
+    config[indicator.id] = {
+      label: indicator.options.name,
+      color: indicator.options.color,
+    };
+  });
+
+  return config;
+};
 
 export default function StockChartPage() {
   const router = useRouter();
@@ -43,6 +67,9 @@ export default function StockChartPage() {
   const [chartData, setChartData] = useState<ChartDataItem[]>([]);
   const [filteredData, setFilteredData] = useState<ChartDataItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [technicalIndicators, setTechnicalIndicators] = useState<
+    TechnicalIndicator[]
+  >([]);
 
   // Fetch historical data for the market item
   useEffect(() => {
@@ -71,10 +98,41 @@ export default function StockChartPage() {
       timeRange as "1m" | "3m" | "6m" | "1y" | "5y",
     );
     setFilteredData(filtered);
+
+    // Recalculate technical indicators when time range changes
+    if (technicalIndicators.length > 0) {
+      // Reset indicators when time range changes to avoid misalignment
+      setTechnicalIndicators([]);
+    }
   }, [timeRange, chartData]);
 
   const chartChange = MarketDataService.calculateChange(filteredData);
   const chartIsPositive = parseFloat(chartChange.percent as string) >= 0;
+
+  // Handle applying a technical indicator to the chart
+  const handleApplyIndicator = (
+    indicatorId: string,
+    data: (number | null)[],
+    options: { period: number; color: string; name: string },
+  ) => {
+    // Remove existing indicator with the same ID if it exists
+    const updatedIndicators = technicalIndicators.filter(
+      indicator => indicator.id !== indicatorId,
+    );
+
+    // Add the new indicator
+    setTechnicalIndicators([
+      ...updatedIndicators,
+      { id: indicatorId, data, options },
+    ]);
+  };
+
+  // Handle removing a technical indicator from the chart
+  const handleRemoveIndicator = (indicatorId: string) => {
+    setTechnicalIndicators(
+      technicalIndicators.filter(indicator => indicator.id !== indicatorId),
+    );
+  };
 
   return (
     <div className="container mx-auto py-6 px-4 max-w-7xl">
@@ -113,7 +171,13 @@ export default function StockChartPage() {
           </Badge>
         </div>
 
-        <div className="flex justify-end">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <ChartTechnicalAnalysis
+            chartData={filteredData}
+            onApplyIndicator={handleApplyIndicator}
+            onRemoveIndicator={handleRemoveIndicator}
+          />
+
           <ToggleGroup
             type="single"
             value={timeRange}
@@ -146,7 +210,7 @@ export default function StockChartPage() {
             </div>
           ) : (
             <ChartContainer
-              config={chartConfig}
+              config={getChartConfig(technicalIndicators)}
               className="aspect-auto h-full w-full"
             >
               <AreaChart data={filteredData}>
@@ -231,6 +295,31 @@ export default function StockChartPage() {
                   }
                   strokeWidth={2}
                 />
+
+                {/* Render technical indicators */}
+                {technicalIndicators.map(indicator => {
+                  // Create a new array combining the filtered data with the indicator data
+                  const indicatorDataPoints = filteredData.map(
+                    (item, index) => ({
+                      ...item,
+                      [indicator.id]: indicator.data[index],
+                    }),
+                  );
+
+                  return (
+                    <Line
+                      key={indicator.id}
+                      data={indicatorDataPoints}
+                      dataKey={indicator.id}
+                      type="monotone"
+                      stroke={indicator.options.color}
+                      strokeWidth={2}
+                      dot={false}
+                      activeDot={false}
+                      name={indicator.options.name}
+                    />
+                  );
+                })}
               </AreaChart>
             </ChartContainer>
           )}

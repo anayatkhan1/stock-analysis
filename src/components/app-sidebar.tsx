@@ -30,7 +30,7 @@ import Link from "next/link";
 export const navigationData = {
   user: {
     name: "Alaska",
-    email: "anayat0khan@gmail.com",
+    email: "stock@alaska.com",
     avatar: "https://github.com/shadcn.png",
   },
   navMain: [
